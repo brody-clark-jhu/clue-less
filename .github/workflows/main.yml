@@ -20,4 +20,11 @@ jobs:
           script: |
             cd /home/brody/clue-less
             git pull origin main
-            pm2 restart game-server || pm2 start "python3 main.py" --name game-server
+            
+            npm install
+            npm run build  # This creates the /dist folder Nginx points to
+            
+            source venv/bin/activate
+            pip install -r requirements.txt
+            
+            pm2 restart clue-less-backend || pm2 start "python3 main.py" --name clue-less-backend
