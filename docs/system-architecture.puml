@@ -1,0 +1,46 @@
+@startuml
+title Clue-less – High-Level System Architecture
+
+actor Player
+
+package "Client (Web Browser)" {
+  component "HTML / CSS UI" as UI
+  component "Board Renderer\n(Canvas)" as Canvas
+  component "Client Game Logic" as ClientLogic
+  component "WebSocket Client" as WSClient
+}
+
+package "Network Layer" {
+  component "WebSocket Connection" as WS
+}
+
+package "Game Server" {
+  component "WebSocket Server" as WSServer
+  component "Game Session Manager" as SessionMgr
+  component "GameState" as GameState
+  component "PlayerState" as PlayerState
+  component "Game Logic" as Rules
+}
+
+Player --> UI
+UI --> ClientLogic
+Canvas --> ClientLogic
+
+ClientLogic --> WSClient
+WSClient --> WS
+WS --> WSServer
+
+WSServer --> SessionMgr
+SessionMgr --> GameState
+GameState --> PlayerState
+SessionMgr --> Rules
+Rules --> GameState
+
+GameState --> WSServer
+WSServer --> WS
+WS --> WSClient
+WSClient --> ClientLogic
+ClientLogic --> UI
+ClientLogic --> Canvas
+
+@enduml
