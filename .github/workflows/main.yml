@@ -20,13 +20,21 @@ jobs:
           username: ${{ secrets.VM_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -e
             cd ~/brody/clue-less
-            git pull origin main
-            
+            git fetch origin
+            git reset --hard origin/main
+            git clean -fd
+
+            echo "Updating frontend..."
+            cd client
             npm install
             npm run build  # This creates the /dist folder Nginx points to
-            
+
+            echo "Updating backend..."
+            cd ../server
             source venv/bin/activate
             pip install -r requirements.txt
-            
+
+            echo "Starting server..."
             pm2 restart clue-less-backend || pm2 start "python3 main.py" --name clue-less-backend
