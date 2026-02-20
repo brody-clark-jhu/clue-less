@@ -38,7 +38,7 @@ jobs:
             pip install -r requirements.txt
 
             echo "Starting server..."
-            pm2 restart clue-less-backend || pm2 start "python3 main.py" --name clue-less-backend
+            pm2 restart clue-less-backend || pm2 start "venv/bin/python3 -m uvicorn main:app --host 0.0.0.0 --port 5000" --name clue-less-backend
 
             # Give nginx access to site files
             chmod -R 755 ~/brody/clue-less/client/dist
