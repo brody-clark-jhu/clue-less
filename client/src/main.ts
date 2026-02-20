@@ -3,7 +3,11 @@ const heading = document.querySelector('h1');
 if (heading) {
     heading.textContent = 'Hello TypeScript App!';
 }
-const socket = new WebSocket('ws://clue-less-ip/ws');
+
+// Dynamically set websocket url and connect
+const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const wsUrl = `${protocol}//${window.location.host}/ws`;
+const socket = new WebSocket(wsUrl);
 
 socket.onopen = () => {
     console.log("Connected to the game server!");

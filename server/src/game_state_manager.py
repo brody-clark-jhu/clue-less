@@ -1,10 +1,22 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 import uuid
 from enum import Enum
 from typing import List
 from dataclasses import dataclass, asdict
+import logging
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 connections: dict[str, WebSocket] = {}
 
 class GameBoardNode:
@@ -113,26 +125,27 @@ async def setup_connection(socket: WebSocket):
     try:
         while True:
             msg = await socket.receive_json()
-            await handle_message(player_id, msg)
+            logger.info("Message received: %s", msg)
+            # await handle_message(player_id, msg)
     except WebSocketDisconnect:
         del connections[player_id]
         
         
-async def handle_message(player_id:str, msg: dict):
-    match msg["type"]:
-        case "move":
-            handle_move(player_id, msg["to"])
-        case "suggest":
-            handle_suggest(player_id, msg)
-        case "accuse":
-            handle_accuse(player_id, msg)
+# async def handle_message(player_id:str, msg: dict):
+#     match msg["type"]:
+#         case "move":
+#             handle_move(player_id, msg["to"])
+#         case "suggest":
+#             handle_suggest(player_id, msg)
+#         case "accuse":
+#             handle_accuse(player_id, msg)
     
     
     
-async def broadcast_state(game_state):
-    for pid, ws in connections.items():
-        view = build_state_view(game_state, pid)
-        await ws.send_json({
-            "type": "state_update",
-            **view
-        })
+# async def broadcast_state(game_state):
+#     for pid, ws in connections.items():
+#         view = build_state_view(game_state, pid)
+#         await ws.send_json({
+#             "type": "state_update",
+#             **view
+#         })
