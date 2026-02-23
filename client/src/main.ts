@@ -10,8 +10,8 @@ const wsUrl = `${protocol}//${window.location.host}/ws`;
 const socket = new WebSocket(wsUrl);
 
 socket.onopen = () => {
-    console.log("Connected to the game server!");
-    socket.send("Hello from the Frontend!");
+    console.log("Connected to the game server.");
+    socket.send("Hello from the Frontend.");
 };
 
 socket.onmessage = (event) => {
@@ -21,6 +21,12 @@ socket.onmessage = (event) => {
 socket.onerror = (error) => {
     console.error("WebSocket Error:", error);
 };
+
+const button = document.getElementById("request")!;
+button.onclick = () =>{
+  socket.send('{"message":"hello from client"}');
+}
+
 // const canvas = document.getElementById("game-board")!;
 // interface BoardNode {
 //   id: string;
