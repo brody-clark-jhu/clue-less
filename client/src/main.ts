@@ -11,7 +11,7 @@ const socket = new WebSocket(wsUrl);
 
 socket.onopen = () => {
     console.log("Connected to the game server.");
-    socket.send("Hello from the Frontend.");
+    socket.send(JSON.stringify({"message":"Hello on open"}));
 };
 
 socket.onmessage = (event) => {
@@ -24,7 +24,11 @@ socket.onerror = (error) => {
 
 const button = document.getElementById("request")!;
 button.onclick = () =>{
-  socket.send('{"message":"hello from client"}');
+  if (socket.readyState !== WebSocket.OPEN) {
+    console.warn("WebSocket not open, state=", socket.readyState);
+    return;
+  }
+  socket.send(JSON.stringify({"message":"hello from client"}));
 }
 
 // const canvas = document.getElementById("game-board")!;

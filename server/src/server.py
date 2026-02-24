@@ -40,6 +40,7 @@ async def setup_connection(socket: WebSocket):
         while True:
             msg = await socket.receive_json()
             logger.info("Message received: %s", msg)
+            print("Message received: %s", msg)
             await socket.send_json({"message": "hello from server"})
             # try:
             #     request = GameRequest.parse_obj(msg)
