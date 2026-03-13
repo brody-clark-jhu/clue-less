@@ -4,11 +4,8 @@ _summary_
 
 import uuid
 import logging
-# from pydantic import BaseModel, ValidationError
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-# from game_state_manager import GameManager
-# from models import GameRequest
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +19,6 @@ app.add_middleware(
 )
 
 connections: dict[str, WebSocket] = {}
-# game_manager = GameManager()
-
 
 @app.websocket("/ws")
 async def setup_connection(socket: WebSocket):
@@ -39,11 +34,5 @@ async def setup_connection(socket: WebSocket):
             logger.info("Message received: %s", msg)
             print("Message received: %s", msg)
             await socket.send_json({"message": "hello from server"})
-            # try:
-            #     request = GameRequest.parse_obj(msg)
-            # except ValidationError as e:
-            #     await socket.send_json({"error": e.errors()})
-            #     continue
-            # await game_manager.handle(request)
     except WebSocketDisconnect:
         del connections[player_id]
