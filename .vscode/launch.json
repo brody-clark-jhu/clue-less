@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Client Dev Server",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}/client",
+      "skipFiles": ["<node_internals>/**"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Server",
+      "type": "python",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["server:app", "--reload", "--host", "0.0.0.0", "--port", "5000"],
+      "cwd": "${workspaceFolder}/server/src",
+      "python": "${workspaceFolder}/server/venv/Scripts/python.exe",
+      "justMyCode": true
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Client + Server",
+      "configurations": ["Client Dev Server", "Server"],
+      "stopAll": true
+    }
+  ]
+}
