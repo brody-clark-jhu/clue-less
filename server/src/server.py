@@ -22,7 +22,7 @@ app.add_middleware(
 )
 
 connections: dict[str, WebSocket] = {}
-game_manager = GameManager()
+# game_manager = GameManager()
 
 
 @app.websocket("/ws")
