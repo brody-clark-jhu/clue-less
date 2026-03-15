@@ -1,4 +1,4 @@
-import type { CommandDTO, GameStateDTO, ServerResponseDTO } from "./types";
+import type { GameState, GameRequest, GameResponse } from "./types";
 
 export class Client {
   private socket: WebSocket | null = null;
@@ -6,36 +6,38 @@ export class Client {
   private readonly MAX_RETRIES = 10;
   private readonly BASE_DELAY_MILLISECONDS = 500;
 
-  constructor() {
-    this.connectWebSocket();
-  }
+  constructor() {}
 
-  public sendMessage(command: CommandDTO): Promise<GameStateDTO> {
+  public sendMessage(message: GameRequest): Promise<GameResponse> {
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
-        return Promise.reject(new Error("socket not open"));
+      return Promise.reject(new Error("socket not open"));
     }
-    
+
     return new Promise((resolve, reject) => {
-    const listener = (event: MessageEvent) => {
-      this.socket!.removeEventListener("message", listener);
-      resolve(event.data as GameStateDTO);
-    };
+      const listener = (event: MessageEvent) => {
+        this.socket!.removeEventListener("message", listener);
+        try {
+          const response: GameResponse = JSON.parse(event.data);
+          resolve(response);
+        } catch (error) {
+          reject(new Error("Failed to parse response"));
+        }
+      };
 
-    // handle socket close/errors while waiting
-    const onClose = () => {
-      this.socket?.removeEventListener("message", listener);
-      reject(new Error("socket closed before response"));
-    };
+      const onClose = () => {
+        this.socket?.removeEventListener("message", listener);
+        reject(new Error("socket closed before response"));
+      };
 
-    this.socket?.addEventListener("message", listener);
-    this.socket?.addEventListener("close", onClose, { once: true });
-    this.socket?.addEventListener("error", onClose, { once: true });
+      this.socket!.addEventListener("message", listener);
+      this.socket!.addEventListener("close", onClose, { once: true });
+      this.socket!.addEventListener("error", onClose, { once: true });
 
-    this.socket?.send(JSON.stringify(command));
-  });
+      this.socket!.send(JSON.stringify(message));
+    });
   }
 
-  private connectWebSocket() {
+  public connectWebSocket() {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
 
@@ -81,6 +83,3 @@ export class Client {
     setTimeout(() => this.connectWebSocket(), delay);
   }
 }
-
-// Initial connection attempt
-new Client();
