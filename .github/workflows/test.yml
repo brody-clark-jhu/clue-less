@@ -6,7 +6,8 @@ on:
       - main
   workflow_call:
 
-test:
+jobs:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
