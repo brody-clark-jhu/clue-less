@@ -1,23 +1,70 @@
 import { Client } from "./client";
-import type { CommandDTO } from "./types";
-import { onRequestButtonClick } from "./view";
+import type {
+  MessageRequest,
+  MessageResponse,
+  JoinRequest,
+  JoinResponse,
+  PlayerState,
+  GameRequest,
+  GameResponse,
+} from "./types";
+import { View, onRequestButtonClick } from "./view";
 
 export class PlayerController {
   client: Client;
+  view: View;
+  playerState: PlayerState | undefined;
 
-  constructor(c: Client) {
+  constructor(c: Client, v: View) {
     this.client = c;
+    this.view = v;
 
     onRequestButtonClick(() => {
       console.log("request button clicked.");
-      const cmd: CommandDTO = {
+      const msg: MessageRequest = {
         type: "message",
+        requestId: crypto.randomUUID(),
         payload: {
-          playerId: "player 1",
+          playerId: "",
           message: "Hello from client",
         },
       };
-      this.client.sendMessage(cmd);
+      this.client.sendMessage(msg).then((response: GameResponse) => {
+        if (response.type == "message_response") {
+          const msgResponse = response as MessageResponse;
+          console.log("Message received:", msgResponse?.payload.message);
+
+          this.view.SetDisplayMessage(
+            `Message received: ${msgResponse?.payload.message}`,
+          );
+        }
+      });
     });
+  }
+
+  public start() {
+    const cmd: JoinRequest = {
+      type: "join",
+      requestId: crypto.randomUUID(),
+      payload: {
+        playerName: "player",
+      },
+    };
+    this.client
+      .sendMessage(cmd)
+      .then((response: GameResponse) => {
+        if (response.type === "join_response") {
+          const joinResponse = response as JoinResponse;
+          const playerState = joinResponse.payload.playerState;
+
+          this.playerState = playerState;
+          console.log("Player ID:", playerState.playerId);
+        } else {
+          console.error("Unexpected response type:", response.type);
+        }
+      })
+      .catch((error) => {
+        console.error("Send message failed:", error);
+      });
   }
 }
