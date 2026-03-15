@@ -32,10 +32,10 @@ export class PlayerController {
       this.client.sendMessage(msg).then((response: GameResponse) => {
         if (response.type == "message_response") {
           const msgResponse = response as MessageResponse;
-          console.log("Message received:", msgResponse?.payload.message);
+          console.log("message received:", msgResponse?.payload.message);
 
           this.view.SetDisplayMessage(
-            `Message received: ${msgResponse?.payload.message}`,
+            `message received: ${msgResponse?.payload.message}`,
           );
         }
       });
@@ -60,11 +60,11 @@ export class PlayerController {
           this.playerState = playerState;
           console.log("Player ID:", playerState.playerId);
         } else {
-          console.error("Unexpected response type:", response.type);
+          console.error("unexpected response type:", response.type);
         }
       })
       .catch((error) => {
-        console.error("Send message failed:", error);
+        console.error("send message failed:", error);
       });
   }
 }
