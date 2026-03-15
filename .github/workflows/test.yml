@@ -1,0 +1,38 @@
+name: Run Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_call:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Run Client Tests
+        run: |
+          cd client
+          npm install
+          npm test
+
+      - name: Run Server Tests
+        run: |
+          cd server
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          pytest
