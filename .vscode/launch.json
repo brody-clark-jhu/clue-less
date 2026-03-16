@@ -19,7 +19,7 @@
       "module": "uvicorn",
       "args": ["src.server:app", "--reload", "--host", "0.0.0.0", "--log-level", "debug", "--port", "5000"],
       "cwd": "${workspaceFolder}/server",
-      "python": "${workspaceFolder}/server/venv/Scripts/python.exe",
+      "python": "${command:python.interpreterPath}",
       "justMyCode": true
     }
   ],
