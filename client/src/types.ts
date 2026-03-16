@@ -1,28 +1,12 @@
-export interface GameState {}
-
-export interface JoinRequest {
-  type: "join";
-  requestId: string;
-  payload: {
-    playerName: string;
-  };
-}
-
-export interface JoinResponse {
-  type: "join_response";
-  payload: {
-    playerState: PlayerState;
-    gameState: GameState;
-  };
+export interface GameUpdate {
+  type: "game_update";
+  message: string;
+  from_player: string;
 }
 
 export interface MessageRequest {
   type: "message";
-  requestId: string;
-  payload: {
-    playerId: string;
-    message: string;
-  };
+  message: string;
 }
 
 export interface MessageResponse {
@@ -37,5 +21,5 @@ export interface PlayerState {
 }
 
 // Union type for all requests/responses
-export type GameRequest = JoinRequest | MessageRequest;
-export type GameResponse = JoinResponse | MessageResponse;
+export type GameRequest = MessageRequest;
+export type GameResponse = GameUpdate | MessageResponse;

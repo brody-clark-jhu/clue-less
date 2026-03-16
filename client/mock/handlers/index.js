@@ -1,7 +1,6 @@
-import * as join from "./join.js";
-import * as message from "./message.js";
+import * as message from "./gameUpdate.js";
 
 export const handlers = {
-  join: join.join,
+  gameUpdate: message.message,
   message: message.message,
 };

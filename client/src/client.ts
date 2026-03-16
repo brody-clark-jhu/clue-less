@@ -1,4 +1,4 @@
-import type { GameState, GameRequest, GameResponse } from "./types";
+import type { GameRequest, GameUpdate } from "./types";
 
 export class Client {
   private socket: WebSocket | null = null;
@@ -8,7 +8,8 @@ export class Client {
 
   constructor() {}
 
-  public sendMessage(message: GameRequest): Promise<GameResponse> {
+  public sendMessage(message: GameRequest): Promise<GameUpdate> {
+    console.log("Sending message");
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
       return Promise.reject(new Error("socket not open"));
     }
@@ -17,9 +18,11 @@ export class Client {
       const listener = (event: MessageEvent) => {
         this.socket!.removeEventListener("message", listener);
         try {
-          const response: GameResponse = JSON.parse(event.data);
+          const response: GameUpdate = JSON.parse(event.data);
+          console.info("Successfully parsed response.");
           resolve(response);
         } catch (error) {
+            console.error("Failed to pars response", error);
           reject(new Error("Failed to parse response"));
         }
       };
@@ -37,36 +40,52 @@ export class Client {
     });
   }
 
-  public connectWebSocket() {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+  public connectWebSocket(): Promise<GameUpdate | null> {
+    console.info("Connecting to server...");
+    return new Promise((resolve, reject) => {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
 
-    try {
-      this.socket = new WebSocket(wsUrl);
-    } catch (error) {
-      console.error("Failed to create WebSocket:", error);
-      this.scheduleReconnect();
-      return;
-    }
+      try {
+        this.socket = new WebSocket(wsUrl);
+        console.info("Successfully connected.");
+      } catch (error) {
+        console.error("Failed to create WebSocket:", error);
+        this.scheduleReconnect();
+        resolve(null); // Return null on connection failure
+        return;
+      }
 
-    this.socket.onopen = () => {
-      console.log("Connected to the game server.");
-      this.retryCount = 0;
-      this.socket!.send(JSON.stringify({ message: "Hello on open" }));
-    };
+      this.socket.onopen = () => {
+        console.log("Connected to the game server.");
+        this.retryCount = 0;
+      };
 
-    this.socket.onmessage = (event) => {
-      console.log("Server says:", event.data);
-    };
+      this.socket.onmessage = (event) => {
+        console.log("Server says:", event.data);
+        try {
+          const response: GameUpdate = JSON.parse(event.data);
+          if (response.type === "game_update") {
+            resolve(response as GameUpdate);
+          } else {
+            console.log("Received non-join response:", response.type);
+          }
+        } catch (error) {
+          console.error("Failed to parse server message:", error);
+        }
+      };
 
-    this.socket.onerror = (error) => {
-      console.error("WebSocket Error:", error);
-    };
+      this.socket.onerror = (error) => {
+        console.error("WebSocket Error:", error);
+        resolve(null);
+      };
 
-    this.socket.onclose = () => {
-      console.warn("WebSocket connection closed");
-      this.scheduleReconnect();
-    };
+      this.socket.onclose = () => {
+        console.warn("WebSocket connection closed");
+        this.scheduleReconnect();
+        resolve(null);
+      };
+    });
   }
 
   private scheduleReconnect() {

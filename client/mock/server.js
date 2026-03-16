@@ -17,7 +17,7 @@ wss.on("connection", (ws) => {
     // Handle client's initial connection message
     if (!request.type) {
       console.log("Client connected.");
-      ws.send(JSON.stringify({ type: "message", payload: { message: "connected to mock server" } }));
+      ws.send(JSON.stringify({ type: "game_update", message: "connected to mock server", from_player: "123"}));
       return;
     }
 
