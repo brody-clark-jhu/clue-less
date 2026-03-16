@@ -7,7 +7,11 @@ describe("PlayerController.start", () => {
   });
 
   it("calls connectWebSocket, sets playerId and updates the view", async () => {
-    const fakeUpdate = { type: "game_update", message: "welcome", from_player: "player1" };
+    const fakeUpdate = {
+      type: "game_update",
+      message: "welcome",
+      from_player: "player1",
+    };
 
     const fakeClient = {
       connectWebSocket: vi.fn().mockResolvedValue(fakeUpdate),

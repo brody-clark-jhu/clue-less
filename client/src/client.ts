@@ -22,7 +22,7 @@ export class Client {
           console.info("Successfully parsed response.");
           resolve(response);
         } catch (error) {
-            console.error("Failed to pars response", error);
+          console.error("Failed to pars response", error);
           reject(new Error("Failed to parse response"));
         }
       };

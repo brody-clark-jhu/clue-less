@@ -13,9 +13,9 @@ describe("Client", () => {
 
   it("sendMessage rejects when socket is not open", async () => {
     const c = new Client();
-    await expect(c.sendMessage({ type: "message", message: "hi" } as GameRequest)).rejects.toThrow(
-      "socket not open",
-    );
+    await expect(
+      c.sendMessage({ type: "message", message: "hi" } as GameRequest),
+    ).rejects.toThrow("socket not open");
   });
 
   it("sendMessage resolves with parsed GameUpdate when socket is open and responds", async () => {
@@ -28,7 +28,9 @@ describe("Client", () => {
         (this.listeners[type] ||= []).push(cb);
       }
       removeEventListener(type: string, cb: Function) {
-        this.listeners[type] = (this.listeners[type] || []).filter((f) => f !== cb);
+        this.listeners[type] = (this.listeners[type] || []).filter(
+          (f) => f !== cb,
+        );
       }
       send(data: string) {
         this.lastSent = data;
@@ -44,19 +46,29 @@ describe("Client", () => {
     const c = new Client();
     (c as any).socket = new FakeWS();
 
-    const p = c.sendMessage({ type: "message", message: "hello" } as GameRequest);
+    const p = c.sendMessage({
+      type: "message",
+      message: "hello",
+    } as GameRequest);
 
     // simulate server reply
     (c as any).socket.dispatchMessage(
-      JSON.stringify({ type: "game_update", message: "ok", from_player: "p1" } as GameUpdate),
+      JSON.stringify({
+        type: "game_update",
+        message: "ok",
+        from_player: "p1",
+      } as GameUpdate),
     );
 
     const res = await p;
-    expect(res).toEqual({ type: "game_update", message: "ok", from_player: "p1" });
+    expect(res).toEqual({
+      type: "game_update",
+      message: "ok",
+      from_player: "p1",
+    });
   });
 
   it("connectWebSocket returns null if WebSocket constructor throws", async () => {
-
     (globalThis as any).WebSocket = function () {
       throw new Error("fail create");
     };
@@ -98,10 +110,18 @@ describe("Client", () => {
     // simulate server message
     inst.onmessage &&
       inst.onmessage({
-        data: JSON.stringify({ type: "game_update", message: "joined", from_player: "playerA" }),
+        data: JSON.stringify({
+          type: "game_update",
+          message: "joined",
+          from_player: "playerA",
+        }),
       });
 
     const res = await p;
-    expect(res).toEqual({ type: "game_update", message: "joined", from_player: "playerA" });
+    expect(res).toEqual({
+      type: "game_update",
+      message: "joined",
+      from_player: "playerA",
+    });
   });
 });
