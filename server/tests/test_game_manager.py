@@ -17,7 +17,7 @@ class TestAddPlayer:
         assert len(responses) == 1
         target, response = responses[0]
         assert target == "player-1"
-        assert response["type"] == "welcome"
+        assert response["type"] == "game_update"
         assert "player-1" in response["message"]
 
     def test_returns_from_player(self):

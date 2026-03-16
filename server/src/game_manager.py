@@ -11,7 +11,7 @@ class GameManager:
         """Register a new player and return a targeted welcome response."""
         self.players.add(player_id)
         response = ServerResponse(
-            type="welcome",
+            type="game_update",
             message=f"Welcome to the game, {player_id}!",
             from_player=player_id
         )
