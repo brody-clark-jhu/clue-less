@@ -10,3 +10,4 @@ class ServerResponse(BaseModel):
     type: str = "game_update"
     message: str
     from_player: str | None = None
+    
