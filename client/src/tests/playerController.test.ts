@@ -47,6 +47,6 @@ describe("PlayerController.start", () => {
       payload: { playerStates: [{ playerId: "player1", clickCount: 3 }] },
     });
 
-    expect(fakeView.SetDisplayMessage).toHaveBeenCalledWith(`You clicked x3.`);
+    expect(fakeView.SetDisplayMessage).toHaveBeenCalledWith(`You clicked x3`);
   });
 });
