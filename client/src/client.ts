@@ -21,6 +21,7 @@ export class Client {
       return Promise.reject(new Error("socket not open"));
     }
     try {
+      // Fire and forget messages. Server updates are handled by onMessage callback.
       this.socket.send(JSON.stringify(command));
       return Promise.resolve();
     } catch (err) {

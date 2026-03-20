@@ -58,9 +58,9 @@ export class PlayerController {
         for (let index = 0; index < playerStates.length; index++) {
           const player = playerStates[index];
           if (player.playerId == this.playerId) {
-            this.view.SetDisplayMessage(`You clicked x${player.clickCount}.`);
+            this.view.SetDisplayMessage(`You clicked x${player.clickCount}`);
           } else {
-            // Make sure player exists
+            // Make sure text exists for player
             if (!this.view.HasPlayer(player.playerId)) {
               this.view.AddPlayer(player.playerId, "");
             }
@@ -68,7 +68,7 @@ export class PlayerController {
             // Update click counter
             this.view.SetPlayerText(
               player.playerId,
-              `Clicked x${player.clickCount}.`,
+              `Clicked x${player.clickCount}`,
             );
           }
         }
