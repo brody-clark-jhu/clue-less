@@ -7,46 +7,44 @@ from src.model import ClientCommand, ServerResponse
 
 class TestClientCommand:
     def test_valid_command(self):
-        cmd = ClientCommand(type="message", message="hello")
+        payload: dict = {"message":"test"}
+        cmd = ClientCommand(type="message", payload=payload)
         assert cmd.type == "message"
-        assert cmd.message == "hello"
+        assert cmd.payload == {"message":"test"}
 
     def test_default_type(self):
-        cmd = ClientCommand(message="hello")
-        assert cmd.type == "message"
+        payload: dict = {"message":"test"}
+        cmd = ClientCommand(type="hello", payload=payload)        
+        assert cmd.type == "hello"
 
     def test_missing_message_raises(self):
         with pytest.raises(ValidationError):
             ClientCommand()
 
     def test_model_dump(self):
-        cmd = ClientCommand(message="hello")
-        assert cmd.model_dump() == {"type": "message", "message": "hello"}
+        payload: dict = {"message":"test"}
+        cmd = ClientCommand(type="hello", payload=payload)
+        assert cmd.model_dump() == {"type": "hello", "payload":{"message": "test"}}
 
 
 class TestServerResponse:
     def test_valid_response(self):
-        resp = ServerResponse(type="game_update", message="test", from_player="p1")
+        payload: dict = {"message":"test", "from_player":"p1"}
+        resp = ServerResponse(type="game_update", payload=payload)
         assert resp.type == "game_update"
-        assert resp.message == "test"
-        assert resp.from_player == "p1"
+        assert resp.payload == payload
 
     def test_default_type(self):
-        resp = ServerResponse(message="test")
+        resp = ServerResponse(payload={"field":"value"})
         assert resp.type == "game_update"
-
-    def test_default_from_player_is_none(self):
-        resp = ServerResponse(message="test")
-        assert resp.from_player is None
 
     def test_missing_message_raises(self):
         with pytest.raises(ValidationError):
             ServerResponse()
 
     def test_model_dump(self):
-        resp = ServerResponse(message="test", from_player="p1")
+        resp = ServerResponse(type="test", payload={"field":"value"})
         assert resp.model_dump() == {
-            "type": "game_update",
-            "message": "test",
-            "from_player": "p1",
+            "type": "test",
+            "payload": {"field": "value"}
         }

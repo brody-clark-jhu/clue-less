@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { Client } from "../client";
-import type { GameRequest, GameUpdate } from "../types";
+import type { ServerEvent, ClientCommand, GameState } from "../types";
 
 describe("Client", () => {
   afterEach(() => {
@@ -14,30 +14,22 @@ describe("Client", () => {
   it("sendMessage rejects when socket is not open", async () => {
     const c = new Client();
     await expect(
-      c.sendMessage({ type: "message", message: "hi" } as GameRequest),
+      c.sendMessage({ type: "message", payload: { message: "hi"} } as ClientCommand),
     ).rejects.toThrow("socket not open");
   });
 
-  it("sendMessage resolves with parsed GameUpdate when socket is open and responds", async () => {
+  it("sendMessage sends and subscribers receive server events", async () => {
     class FakeWS {
       static OPEN = 1;
       readyState = FakeWS.OPEN;
-      listeners: Record<string, Function[]> = {};
       lastSent: string | null = null;
-      addEventListener(type: string, cb: Function) {
-        (this.listeners[type] ||= []).push(cb);
-      }
-      removeEventListener(type: string, cb: Function) {
-        this.listeners[type] = (this.listeners[type] || []).filter(
-          (f) => f !== cb,
-        );
-      }
+      onmessage: ((ev: any) => void) | null = null;
       send(data: string) {
         this.lastSent = data;
       }
       dispatchMessage(data: string) {
         const ev = { data };
-        (this.listeners["message"] || []).slice().forEach((f) => f(ev));
+        if (this.onmessage) this.onmessage(ev);
       }
     }
 
@@ -46,82 +38,81 @@ describe("Client", () => {
     const c = new Client();
     (c as any).socket = new FakeWS();
 
-    const p = c.sendMessage({
+    // forward incoming socket messages to client's handlers
+    (c as any).socket.onmessage = (ev: any) => {
+    const parsed = JSON.parse(ev.data);
+    (c as any).messageHandlers.forEach((h: any) => {
+        try { h(parsed); } catch (e) { /* noop */ }
+    });
+    };
+
+    const received = new Promise<ServerEvent>((resolve) => {
+      c.onMessage((msg) => resolve(msg));
+    });
+
+    await c.sendMessage({
       type: "message",
-      message: "hello",
-    } as GameRequest);
+      payload: { message: "hello" },
+    } as ClientCommand);
 
     // simulate server reply
     (c as any).socket.dispatchMessage(
       JSON.stringify({
-        type: "game_update",
-        message: "ok",
-        from_player: "p1",
-      } as GameUpdate),
+        type: "welcome",
+        payload: { playerId: "123" },
+      } as ServerEvent),
     );
 
-    const res = await p;
+    const res = await received;
     expect(res).toEqual({
-      type: "game_update",
-      message: "ok",
-      from_player: "p1",
+      type: "welcome",
+      payload: { playerId: "123" },
     });
   });
 
-  it("connectWebSocket returns null if WebSocket constructor throws", async () => {
-    (globalThis as any).WebSocket = function () {
-      throw new Error("fail create");
-    };
-    const c = new Client();
-    const res = await c.connectWebSocket();
-    expect(res).toBeNull();
-  });
-
-  it("connectWebSocket resolves with GameUpdate when server sends a game_update", async () => {
-    // Mock WebSocket that exposes instance to the test
+   it("connectWebSocket installs onmessage and subscribers receive server events", async () => {
     class MockWS {
       static OPEN = 1;
       onopen: ((ev?: any) => void) | null = null;
       onmessage: ((ev: any) => void) | null = null;
-      onerror: ((ev?: any) => void) | null = null;
-      onclose: ((ev?: any) => void) | null = null;
       url: string;
       constructor(url: string) {
         this.url = url;
-        // allow tests to access the created instance
         (MockWS as any).lastInstance = this;
-
         setTimeout(() => this.onopen && this.onopen());
       }
       send() {}
       close() {}
     }
 
-    // stub global WebSocket
     (globalThis as any).WebSocket = MockWS;
 
     const c = new Client();
-    const p = c.connectWebSocket();
+    const msgPromise = new Promise<ServerEvent>((resolve) => {
+      c.onMessage((m) => resolve(m));
+    });
 
-    // wait a tick for constructor/onopen
+    // start connection (we don't need to await the promise)
+    c.connectWebSocket();
+
+    // wait a tick for constructor/onopen wiring
     await new Promise((r) => setTimeout(r, 0));
 
     const inst = (MockWS as any).lastInstance as MockWS;
-    // simulate server message
+
     inst.onmessage &&
       inst.onmessage({
         data: JSON.stringify({
           type: "game_update",
-          message: "joined",
-          from_player: "playerA",
+          payload: { playerStates: [{ playerId: "p1", clickCount: 0 }] },
         }),
       });
 
-    const res = await p;
-    expect(res).toEqual({
-      type: "game_update",
-      message: "joined",
-      from_player: "playerA",
-    });
+    const ev = await msgPromise;
+    expect(ev.type).toBe("game_update");
+    if (ev.type == "game_update"){
+        const gs: GameState = ev.payload;
+        expect(gs!.playerStates[0].playerId).toBe("p1");
+    } 
   });
 });

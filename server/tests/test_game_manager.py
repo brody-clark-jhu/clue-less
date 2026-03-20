@@ -2,29 +2,38 @@
 
 import pytest
 from pydantic import ValidationError
+from src.model import ClientCommand, GameState, PlayerState
 from src.game_manager import GameManager
 
 
 class TestAddPlayer:
-    def test_adds_player_to_set(self):
+    def test_adds_player_to_game_state(self):
         gm = GameManager()
         gm.add_player("player-1")
-        assert "player-1" in gm.players
+        assert "player-1" == gm.game_state.playerStates[0].playerId
 
     def test_returns_targeted_welcome(self):
         gm = GameManager()
         responses = gm.add_player("player-1")
-        assert len(responses) == 1
-        target, response = responses[0]
-        assert target == "player-1"
-        assert response["type"] == "game_update"
-        assert "player-1" in response["message"]
 
-    def test_returns_from_player(self):
-        gm = GameManager()
-        responses = gm.add_player("player-1")
-        _, response = responses[0]
-        assert response["from_player"] == "player-1"
+        # Expect a welcome + a game_update targeted to the new player
+        assert len(responses) == 2
+
+        tgt0, resp0 = responses[0]
+        tgt1, resp1 = responses[1]
+
+        assert tgt0 == "player-1"
+        assert resp0["type"] == "welcome"
+        assert resp0["payload"]["playerId"] == "player-1"
+
+        assert tgt1 == "player-1"
+        assert resp1["type"] == "game_update"
+        payload = resp1["payload"]
+        assert "playerStates" in payload
+        assert any(
+            p["playerId"] == "player-1" and p["clickCount"] == 0
+            for p in payload["playerStates"]
+        )
 
 
 class TestRemovePlayer:
@@ -42,21 +51,30 @@ class TestRemovePlayer:
 class TestHandleCommand:
     def test_returns_broadcast(self):
         gm = GameManager()
-        responses = gm.handle_command("player-1", {"message": "hello"})
+        gm.game_state = GameState(
+            playerStates=[PlayerState(playerId="player-1", clickCount=0)]
+        )
+        responses = gm.handle_command(
+            "player-1",
+            ClientCommand(type="message", payload={"message": "Hello"}).model_dump(),
+        )
         assert len(responses) == 1
         target, response = responses[0]
         assert target is None
 
     def test_response_contains_message(self):
         gm = GameManager()
-        _, response = gm.handle_command("player-1", {"message": "hello"})[0]
-        assert response["type"] == "game_update"
-        assert "hello" in response["message"]
-
-    def test_response_contains_from_player(self):
-        gm = GameManager()
-        _, response = gm.handle_command("player-1", {"message": "hello"})[0]
-        assert response["from_player"] == "player-1"
+        gm.game_state = GameState(
+            playerStates=[PlayerState(playerId="player-1", clickCount=0)]
+        )
+        responses = gm.handle_command(
+            "player-1",
+            ClientCommand(type="message", payload={"message": "Hello"}).model_dump(),
+        )
+        assert responses[0][1]["type"] == "game_update"
+        expected_player_state = PlayerState(playerId="player-1", clickCount=1)
+        expected_game_state = GameState(playerStates=[expected_player_state])
+        assert responses[0][1]["payload"] == expected_game_state.model_dump()
 
     def test_invalid_command_raises(self):
         gm = GameManager()

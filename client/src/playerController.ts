@@ -3,7 +3,7 @@ import type {
   ServerEvent,
   PlayerState,
   ClientCommand,
-  MessageRequest,
+  MessageCommand,
 } from "./types";
 import { View, onRequestButtonClick } from "./view";
 
@@ -13,14 +13,14 @@ export class PlayerController {
   playerId: string;
   playerState: PlayerState | undefined;
 
-  constructor(c: Client, v: View) {
-    this.client = c;
-    this.view = v;
+  constructor(client: Client, view: View) {
+    this.client = client;
+    this.view = view;
     this.playerId = "";
 
     onRequestButtonClick(() => {
       console.log("request button clicked.");
-      const message: MessageRequest = { message: "Hello from client" };
+      const message: MessageCommand = { message: "Hello from client" };
       const cmd: ClientCommand = {
         type: "message",
         payload: message,
@@ -30,19 +30,22 @@ export class PlayerController {
   }
 
   public start() {
+    // Setup socket message handler
     this.client.onMessage((msg) => {
       this.handleServerEvent(msg);
     });
 
+    // Connect socket
     this.client.connectWebSocket();
   }
 
   private handleServerEvent(event: ServerEvent) {
     console.log(`Received event ${JSON.stringify(event)}`);
+
+    // Handle different server event types
     switch (event.type) {
       case "player_joined": {
         this.view.AddPlayer(event.payload.playerId, "Joined");
-
         break;
       }
       case "welcome": {
@@ -55,9 +58,7 @@ export class PlayerController {
         for (let index = 0; index < playerStates.length; index++) {
           const player = playerStates[index];
           if (player.playerId == this.playerId) {
-            this.view.SetDisplayMessage(
-              `You clicked ${player.clickCount} times.`,
-            );
+            this.view.SetDisplayMessage(`You clicked x${player.clickCount}.`);
           } else {
             // Make sure player exists
             if (!this.view.HasPlayer(player.playerId)) {
@@ -67,7 +68,7 @@ export class PlayerController {
             // Update click counter
             this.view.SetPlayerText(
               player.playerId,
-              `Clicked ${player.clickCount} times.`,
+              `Clicked x${player.clickCount}.`,
             );
           }
         }

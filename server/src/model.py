@@ -21,11 +21,9 @@ class ServerResponse(BaseModel):
     
     
 class WelcomeResponse(BaseModel):
+    """Response to a new player connecting for the first time. Provides player id."""
     playerId: str
     
 class PlayerJoinedEvent(BaseModel):
+    """Event to notify players of a newly connected player."""
     playerId: str
-    
-class MessageResponse(BaseModel):
-    message: str
-    from_player: str | None = None

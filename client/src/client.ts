@@ -1,4 +1,4 @@
-import type { ServerEvent, ClientCommand, Envelope } from "./types";
+import type { ServerEvent, ClientCommand } from "./types";
 
 export class Client {
   private socket: WebSocket | null = null;
@@ -10,47 +10,22 @@ export class Client {
 
   constructor() {}
 
+  // WebSocket message callback for decoupled message handling
   public onMessage(handler: (msg: ServerEvent) => void): () => void {
     this.messageHandlers.add(handler);
     return () => this.messageHandlers.delete(handler);
   }
 
-  public sendMessage(message: ClientCommand): Promise<void> {
-    console.log("Sending message");
+  public sendMessage(command: ClientCommand): Promise<void> {
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
       return Promise.reject(new Error("socket not open"));
     }
-
-    return new Promise((resolve, reject) => {
-      const listener = (event: MessageEvent) => {
-        this.socket!.removeEventListener("message", listener);
-        try {
-          const parsed: ServerEvent = JSON.parse(event.data);
-          // notify all subscribers
-          this.messageHandlers.forEach((h) => {
-            try {
-              h(parsed);
-            } catch (e) {
-              console.error("handler error", e);
-            }
-          });
-          // resolves connectWebSocket promise if needed
-        } catch (err) {
-          console.error("Failed to parse server message:", err);
-        }
-      };
-
-      const onClose = () => {
-        this.socket?.removeEventListener("message", listener);
-        reject(new Error("socket closed before response"));
-      };
-
-      this.socket!.addEventListener("message", listener);
-      this.socket!.addEventListener("close", onClose, { once: true });
-      this.socket!.addEventListener("error", onClose, { once: true });
-
-      this.socket!.send(JSON.stringify(message));
-    });
+    try {
+      this.socket.send(JSON.stringify(command));
+      return Promise.resolve();
+    } catch (err) {
+      return Promise.reject(err);
+    }
   }
 
   public connectWebSocket(): Promise<void> {
