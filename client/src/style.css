@@ -1,38 +1,193 @@
+/* Apply the themes for font and for the accents on colors */
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  --bg-deep: #0C0E12;
+  --bg-surface: #151820;
+  --bg-elevated: #1C2030;
+  --bg-hover: #252A3A;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  --text-primary: #E8E0E0;
+  --text-secondary: #A09A94;
+  --text-muted: #5C5951;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  --accent-gold: #C9A84C;
+  --accent-gold-dim: #7A6A3A;
+  --accent-red: #8B2D2D;
+
+  --radius-md: 6px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  background-color: var(--bg-deep);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* allows for rewriting of screens and aligns material on them */
+
+.screen {
+  display: none;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.screen.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =======================================================================
+   Home
+   ======================================================================= */
+
+#landing-screen {
+  position: relative;
+  /*
+    BACKGROUND IMAGE:
+    Place your image in client/public/ folder.
+    Example: background-image: url('/clue-bg.jpg');
+  */
+  background-image: url('/images/Home.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: #0a0c12;
+}
+
+.landing-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 12, 18, 0.45) 0%,
+    rgba(10, 12, 18, 0.60) 35%,
+    rgba(10, 12, 18, 0.85) 100%
+  );
+  z-index: 1;
+}
+
+.landing-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100vh;
+  width: 100%;
+  padding: 0 24px;
+}
+
+/* Group the Title together to be centered */
+
+.landing-title-group {
+  margin-top: 22vh;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+/* Title Font: allows for the Montserrat and the shadow affect. */
+
+.landing-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 8rem;
+  font-weight: 900;
+  color: #E8E0E0;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-shadow:
+    2px 2px 0px #8A8A8A,
+    4px 4px 0px #6E6E6E,
+    6px 6px 0px #525252,
+    8px 8px 0px #3A3A3A,
+    10px 10px 0px #222222,
+    12px 12px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* "LESS" ACCENT Creates a red to showcase the Less part of the Clue-LESS*/
+
+.landing-accent {
+  color: #C44B4F;
+  text-shadow:
+    2px 2px 0px #7A2E30,
+    4px 4px 0px #5E2325,
+    6px 6px 0px #42191A,
+    8px 8px 0px #2B1010,
+    10px 10px 0px #1A0A0A,
+    12px 12px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Bottom Portion of the Home Page allowing for the button */
+
+.landing-bottom {
+  margin-bottom: 14vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-landing {
+  padding: 14px 52px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: var(--accent-gold);
+  color: var(--bg-deep);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(201, 168, 76, 0.25);
+  transition: all 0.25s ease;
+}
+
+.btn-landing:hover {
+  background: #D4B35A;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(201, 168, 76, 0.35);
+}
+
+.btn-landing:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 12px rgba(201, 168, 76, 0.2);
+}
+
+.landing-hint {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* =======================================================================
+   Lobby Page
+   ======================================================================= */
+
+#lobby-screen {
+  background-color: var(--bg-deep);
 }
 
 #app {
@@ -42,55 +197,74 @@ h1 {
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vanilla:hover {
-  filter: drop-shadow(0 0 2em #3178c6aa);
+h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary);
 }
 
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
+/* Button (currently for request but needs to be modified for start game and ready */
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  border-radius: var(--radius-md);
+  border: 1px solid #3A3A4A;
+  padding: 0.6em 1.4em;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--bg-elevated);
+  color: var(--text-primary);
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: all 0.2s ease;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+button:hover {
+  border-color: var(--accent-gold-dim);
+  background-color: var(--bg-hover);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 2px solid var(--accent-gold-dim);
+  outline-offset: 2px;
+}
+
+/* sends message to view what the id is from who */
+
+@media (max-width: 600px) {
+  .landing-title {
+    font-size: 4rem;
+    text-shadow:
+      1px 1px 0px #8A8A8A,
+      2px 2px 0px #6E6E6E,
+      3px 3px 0px #525252,
+      4px 4px 0px #3A3A3A,
+      5px 5px 0px #222222,
+      6px 6px 12px rgba(0, 0, 0, 0.4);
   }
-  a:hover {
-    color: #747bff;
+
+  .landing-accent {
+    text-shadow:
+      1px 1px 0px #7A2E30,
+      2px 2px 0px #5E2325,
+      3px 3px 0px #42191A,
+      4px 4px 0px #2B1010,
+      5px 5px 0px #1A0A0A,
+      6px 6px 12px rgba(0, 0, 0, 0.4);
   }
-  button {
-    background-color: #f9f9f9;
+
+  .landing-title-group {
+    margin-top: 18vh;
+  }
+
+  .landing-bottom {
+    margin-bottom: 10vh;
+  }
+
+  .btn-landing {
+    padding: 12px 36px;
+    font-size: 0.85rem;
   }
 }
