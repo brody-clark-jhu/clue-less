@@ -11,13 +11,6 @@ describe("Client", () => {
     } catch {}
   });
 
-  it("sendMessage rejects when socket is not open", async () => {
-    const c = new Client();
-    await expect(
-      c.sendMessage({ type: "message", payload: { message: "hi"} } as ClientCommand),
-    ).rejects.toThrow("socket not open");
-  });
-
   it("sendMessage sends and subscribers receive server events", async () => {
     class FakeWS {
       static OPEN = 1;

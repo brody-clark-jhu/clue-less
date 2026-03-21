@@ -16,23 +16,23 @@ export class Client {
     return () => this.messageHandlers.delete(handler);
   }
 
-  public sendMessage(command: ClientCommand): Promise<void> {
+  public sendMessage(command: ClientCommand){
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
-      return Promise.reject(new Error("socket not open"));
+        console.error("Socket connection not open.");
+      return;
     }
     try {
       // Fire and forget messages. Server updates are handled by onMessage callback.
       this.socket.send(JSON.stringify(command));
-      return Promise.resolve();
+      return;
     } catch (err) {
-      return Promise.reject(err);
+      console.error("Failed to send message: ", err)
     }
   }
 
-  public connectWebSocket(): Promise<void> {
+  public connectWebSocket() {
     console.info("Connecting to server...");
-    return new Promise((resolve, reject) => {
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const wsUrl = `${protocol}//${window.location.host}/ws`;
 
       try {
@@ -75,7 +75,6 @@ export class Client {
         console.warn("WebSocket connection closed");
         this.scheduleReconnect();
       };
-    });
   }
 
   private scheduleReconnect() {
