@@ -16,7 +16,6 @@ class GameManager:
     for the Networking Subsystem to deliver."""
 
     def __init__(self):
-        self.players: set[str] = set()
         self.game_state: GameState = GameState(playerStates=[])
 
     def add_player(self, player_id: str) -> list[tuple[str | None, dict]]:
@@ -82,7 +81,17 @@ class GameManager:
             player_state = self._get_player_state(player_id=player_id)
             if player_state is None:
                 _logger.error("Unable to find player with id: %s", player_id)
-                return [(player_id, self.game_state.model_dump())]
+                return [
+                    (
+                        player_id,
+                        ServerResponse(
+                            type="game_update",
+                            payload=self.game_state.model_dump()
+                        ).model_dump()
+                    )
+                ]
+
+
             player_state.clickCount += 1
             self._set_player_state(player_state=player_state, player_id=player_id)
 
@@ -95,6 +104,7 @@ class GameManager:
                     ).model_dump(),
                 )
             ]
+        raise ValueError(f"Invalid command type: {validated.type!r}")
 
     def _get_player_state(self, player_id: str) -> PlayerState | None:
         for p in self.game_state.playerStates:
@@ -104,5 +114,5 @@ class GameManager:
 
     def _set_player_state(self, player_state: PlayerState, player_id: str):
         for index, p in enumerate(self.game_state.playerStates):
-            if player_id == p:
+            if player_id == p.playerId:
                 self.game_state.playerStates[index] = player_state

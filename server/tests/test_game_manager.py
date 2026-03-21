@@ -40,8 +40,9 @@ class TestRemovePlayer:
     def test_removes_existing_player(self):
         gm = GameManager()
         gm.add_player("player-1")
+        assert any(p.playerId == "player-1" for p in gm.game_state.playerStates)
         gm.remove_player("player-1")
-        assert "player-1" not in gm.players
+        assert not any(p.playerId == "player-1" for p in gm.game_state.playerStates)
 
     def test_remove_nonexistent_player_does_not_raise(self):
         gm = GameManager()
