@@ -1,25 +1,24 @@
-export interface GameUpdate {
-  type: "game_update";
-  message: string;
-  from_player: string;
-}
+export type PlayerState = { playerId: string; clickCount: number };
 
-export interface MessageRequest {
-  type: "message";
-  message: string;
-}
-
-export interface MessageResponse {
-  type: "message_response";
-  payload: {
-    message: string;
-  };
-}
-
-export interface PlayerState {
+export interface WelcomeResponse {
   playerId: string;
 }
+export interface PlayerJoinedEvent {
+  playerId: string;
+}
+export interface GameState {
+  playerStates: PlayerState[];
+}
 
-// Union type for all requests/responses
-export type GameRequest = MessageRequest;
-export type GameResponse = GameUpdate | MessageResponse;
+export interface MessageCommand {
+  message: string;
+}
+
+export type ClientCommand = { type: "message"; payload: MessageCommand };
+
+export type ServerEvent =
+  | { type: "player_joined"; payload: PlayerJoinedEvent }
+  | { type: "welcome"; payload: WelcomeResponse }
+  | { type: "game_update"; payload: GameState };
+
+export type Message = ClientCommand | ServerEvent;

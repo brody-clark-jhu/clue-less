@@ -26,19 +26,32 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
+  flex-direction: column;
   min-width: 320px;
   min-height: 100vh;
 }
 
 h1 {
-  font-size: 3.2em;
+  font-size: 3em;
   line-height: 1.1;
 }
+#players {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  padding: 0.2em;
+  margin: 0;
+  margin-left: 1em;
+  flex-direction: column;
+}
 
-#app {
+#players > p {
+  margin: 0;
+}
+#user {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 3rem;
   text-align: center;
 }
 
