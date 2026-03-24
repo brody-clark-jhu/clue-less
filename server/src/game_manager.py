@@ -1,3 +1,4 @@
+from pydantic import ValidationError
 from src.model import (
     ClientCommand,
     ServerResponse,
@@ -75,7 +76,21 @@ class GameManager:
         """Validate and process a client command. Returns a list of
         (target, response) tuples where target is a player_id for
         targeted sends or None for broadcast."""
-        validated = ClientCommand(**command)
+        
+        try:
+            validated = ClientCommand(**command)
+        except ValidationError as e:
+            _logger.warning("Invalid client command from %s: %s", player_id, e)
+            return [
+                (
+                    player_id,
+                    ServerResponse(
+                        type="error", 
+                        payload={"message": "invalid command format", "details": e.errors()}
+                    ).model_dump()
+                )
+            ]
+
         if validated.type == "message":
             # Update player state
             player_state = self._get_player_state(player_id=player_id)
@@ -85,12 +100,11 @@ class GameManager:
                     (
                         player_id,
                         ServerResponse(
-                            type="game_update",
-                            payload=self.game_state.model_dump()
+                            type="error", 
+                            payload={"message": "player session not found"}
                         ).model_dump()
                     )
                 ]
-
 
             player_state.clickCount += 1
             self._set_player_state(player_state=player_state, player_id=player_id)
@@ -104,7 +118,18 @@ class GameManager:
                     ).model_dump(),
                 )
             ]
-        raise ValueError(f"Invalid command type: {validated.type!r}")
+        
+        # graceful error return
+        _logger.warning("Unsupported command type received: %s", validated.type)
+        return [
+            (
+                player_id,
+                ServerResponse(
+                    type="error", 
+                    payload={"message": f"unsupported command: {validated.type}"}
+                ).model_dump()
+            )
+        ]
 
     def _get_player_state(self, player_id: str) -> PlayerState | None:
         for p in self.game_state.playerStates:
