@@ -107,3 +107,24 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+/* For Home PAGE */
+/* Image for Home-page pic*/
+#landing-screen {
+  background-image: url('/images/Home.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Gold outline on the CLUELESS title */
+.landing-title {
+  -webkit-text-stroke: 2px #C9A84C;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+}
+
+/* Grey italic tagline  */
+.landing-tagline {
+  color: white;
+  font-style: italic;
+}
