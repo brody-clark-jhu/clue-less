@@ -1,3 +1,4 @@
+from pydantic import ValidationError
 from src.model import (
     ClientCommand,
     ServerResponse,
@@ -16,7 +17,6 @@ class GameManager:
     for the Networking Subsystem to deliver."""
 
     def __init__(self):
-        self.players: set[str] = set()
         self.game_state: GameState = GameState(playerStates=[])
 
     def add_player(self, player_id: str) -> list[tuple[str | None, dict]]:
@@ -76,13 +76,36 @@ class GameManager:
         """Validate and process a client command. Returns a list of
         (target, response) tuples where target is a player_id for
         targeted sends or None for broadcast."""
-        validated = ClientCommand(**command)
+        
+        try:
+            validated = ClientCommand(**command)
+        except ValidationError as e:
+            _logger.warning("Invalid client command from %s: %s", player_id, e)
+            return [
+                (
+                    player_id,
+                    ServerResponse(
+                        type="error", 
+                        payload={"message": "invalid command format", "details": e.errors()}
+                    ).model_dump()
+                )
+            ]
+
         if validated.type == "message":
             # Update player state
             player_state = self._get_player_state(player_id=player_id)
             if player_state is None:
                 _logger.error("Unable to find player with id: %s", player_id)
-                return [(player_id, self.game_state.model_dump())]
+                return [
+                    (
+                        player_id,
+                        ServerResponse(
+                            type="error", 
+                            payload={"message": "player session not found"}
+                        ).model_dump()
+                    )
+                ]
+
             player_state.clickCount += 1
             self._set_player_state(player_state=player_state, player_id=player_id)
 
@@ -95,6 +118,18 @@ class GameManager:
                     ).model_dump(),
                 )
             ]
+        
+        # graceful error return
+        _logger.warning("Unsupported command type received: %s", validated.type)
+        return [
+            (
+                player_id,
+                ServerResponse(
+                    type="error", 
+                    payload={"message": f"unsupported command: {validated.type}"}
+                ).model_dump()
+            )
+        ]
 
     def _get_player_state(self, player_id: str) -> PlayerState | None:
         for p in self.game_state.playerStates:
@@ -104,5 +139,5 @@ class GameManager:
 
     def _set_player_state(self, player_state: PlayerState, player_id: str):
         for index, p in enumerate(self.game_state.playerStates):
-            if player_id == p:
+            if player_id == p.playerId:
                 self.game_state.playerStates[index] = player_state
