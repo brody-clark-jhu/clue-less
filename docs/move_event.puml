@@ -1,0 +1,35 @@
+@startuml
+title Player Move Scenario (Server-Side)
+
+autonumber
+
+participant Server
+participant GameManager
+participant GameState
+participant GameBoard
+
+Server -> GameManager : handle_command(MOVE)
+
+GameManager -> GameBoard : validate_move(player, destination)
+GameBoard --> GameManager : valid / invalid
+
+alt Move is valid
+
+    GameManager -> GameBoard : move(player, destination)
+    GameManager -> GameState : update player location
+    ' Update turn-related flags
+    GameManager -> GameManager : set moved_this_turn = True
+
+    alt Destination is a room
+        GameManager -> GameManager : set must_suggest = True
+    end
+
+    GameManager --> Server : game_state_update (broadcast)
+
+else Move is invalid
+
+    GameManager --> Server : error_response
+
+end
+
+@enduml

@@ -1,0 +1,31 @@
+@startuml
+title Accusation Processing (Server-Side)
+
+autonumber
+
+participant Server
+participant GameManager
+participant GameState
+participant CardDeck
+
+Server -> GameManager : handle_command(ACCUSATION)
+
+' Check accusation against solution
+GameManager -> CardDeck : check_solution(suspect, weapon, room)
+CardDeck --> GameManager : correct / incorrect
+
+alt Correct accusation
+    GameManager -> GameState : set phase = ended
+    GameManager --> Server : accusation_result (broadcast)
+    GameManager --> Server : game_over (broadcast)
+    GameManager --> Server : game_state_update
+
+else Incorrect accusation
+    GameManager -> GameState : mark player eliminated
+    GameManager --> Server : accusation_result (broadcast)
+    GameManager --> Server : player_eliminated (broadcast)
+    GameManager --> Server : game_state_update
+
+end
+
+@enduml

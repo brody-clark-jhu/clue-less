@@ -1,0 +1,27 @@
+@startuml
+title Clue-less Server Class Diagram
+
+class Server
+class GameManager
+class GameState
+class PlayerState
+class Card
+class Deck
+class GameBoard
+class SuggestionManager
+
+Server --> GameManager : uses
+GameManager --> GameState : manages
+GameState "1" o-- "*" PlayerState : contains
+GameState "1" o-- "*" Card : contains
+GameManager --> Deck : uses
+GameState --> GameBoard : uses
+PlayerState "1" o-- "*" Card : holds
+Deck "1" o-- "*" Card : contains
+
+' --- SuggestionManager relationships ---
+GameManager "1" *-- "0..1" SuggestionManager : owns
+SuggestionManager --> GameState : reads turn order
+SuggestionManager --> PlayerState : queries/disproves
+
+@enduml
