@@ -55,7 +55,7 @@ export class PlayerController {
         this.view.SetDisplayMessage(`Welcome player: ${this.playerId}.`);
 
         // After receiving welcome from server, transition to lobby UI
-        this.view.showScreen("lobby-screen");
+        this.view.ShowScreen("lobby-screen");
         break;
       }
       case "game_update": {

@@ -110,7 +110,7 @@ button:focus-visible {
 /* For Home PAGE */
 /* Image for Home-page pic*/
 #landing-screen {
-  background-image: url('/images/Home.jpg');
+  background-image: url('/images/background_home.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

@@ -42,7 +42,7 @@ export class View {
   }
 
   //Switch screens using the ID
-  public showScreen(screenId: string): void {
+  public ShowScreen(screenId: string): void {
     document.querySelectorAll(".screen").forEach((s) => {
       s.classList.remove("active");
     });
