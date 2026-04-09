@@ -3,15 +3,51 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>clue-less</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap" rel="stylesheet" />
+    <title>Clue-Less</title>
+    <style>
+      .screen { display: none; width: 100%; min-height: 100vh; }
+      .screen.active { display: flex; align-items: center; justify-content: center; }
+    </style>
   </head>
   <body>
-    <div id="players">
+
+    <!-- ============================================================
+         Home Page that shows the Title and the Join page
+         ============================================================ -->
+    <div id="landing-screen" class="screen active">
+
+      <div class="landing-content">
+
+        <div class="landing-title-group">
+          <h1 class="landing-title">CLUE<span class="landing-accent">LESS</span></h1>
+          <div class="landing-divider"></div>
+          <p class="landing-tagline">Just like the real game ... but less!</p>
+        </div>
+
+        <div class="landing-bottom">
+          <button type="button" id="btn-join-lobby" class="btn-landing">Join Lobby</button>
+        </div>
+
+      </div>
+
     </div>
-    <div id="user">
+
+    <!-- ============================================================
+         Lobby Page that shows the Lobby with other players joining and shows the display
+         TODO: Need to add multiple users joining in the format proposed, along with character selection
+         and READY button and START GAME
+         ============================================================ -->
+    <div id="lobby-screen" class="screen">
+      <div id="app">
         <h1 id="display-message">Display Message</h1>
         <button type="button" id="request">Request</button>
+        <div id="players"></div>
+      </div>
     </div>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

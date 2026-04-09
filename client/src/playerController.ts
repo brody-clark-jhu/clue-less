@@ -5,7 +5,7 @@ import type {
   ClientCommand,
   MessageCommand,
 } from "./types";
-import { View, onRequestButtonClick } from "./view";
+import { View, onRequestButtonClick, onJoinLobbyClick } from "./view";
 
 export class PlayerController {
   client: Client;
@@ -27,6 +27,11 @@ export class PlayerController {
       };
       this.client.sendMessage(cmd);
     });
+
+    onJoinLobbyClick(() => {
+      console.log("join lobby clicked - connecting to server.");
+      this.client.connectWebSocket();
+    });
   }
 
   public start() {
@@ -34,9 +39,6 @@ export class PlayerController {
     this.client.onMessage((msg) => {
       this.handleServerEvent(msg);
     });
-
-    // Connect socket
-    this.client.connectWebSocket();
   }
 
   private handleServerEvent(event: ServerEvent) {
@@ -51,6 +53,9 @@ export class PlayerController {
       case "welcome": {
         this.playerId = event.payload?.playerId;
         this.view.SetDisplayMessage(`Welcome player: ${this.playerId}.`);
+
+        // After receiving welcome from server, transition to lobby UI
+        this.view.ShowScreen("lobby-screen");
         break;
       }
       case "game_update": {
