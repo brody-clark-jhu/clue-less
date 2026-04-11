@@ -3,6 +3,7 @@ import {
   type Locations,
   Rooms,
   Corridors,
+  SecretPassages
 } from "./models/game.model";
 
 type BoardClickCallback = (location: Locations) => void;
