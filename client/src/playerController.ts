@@ -1,8 +1,5 @@
 import { Client } from "./client";
-import type {
-  ServerEvent,
-  PlayerState,
-} from "./types";
+import type { ServerEvent, PlayerState } from "./types";
 import {
   View,
   onJoinLobbyClick,
@@ -17,15 +14,15 @@ import { loadNotebookData } from "./dataLoader";
 
 // Player states for Finite State Machine (FSM)
 export const PLAYER_STATES = {
-  Lobby: 1,     // in lobby
-  Idle: 2,      // waiting for their turn
-  Active: 3,    // active player turn
-  Move: 4,      // move selection active
-  Suggest: 5,   // suggestion active
-  Accuse: 6,    // accusation active
-  Disprove: 7,  // disprove active
-  Eliminated: 8,// eliminated/inactive
-  Start: 9,     // setup game
+  Lobby: 1, // in lobby
+  Idle: 2, // waiting for their turn
+  Active: 3, // active player turn
+  Move: 4, // move selection active
+  Suggest: 5, // suggestion active
+  Accuse: 6, // accusation active
+  Disprove: 7, // disprove active
+  Eliminated: 8, // eliminated/inactive
+  Start: 9, // setup game
 } as const;
 
 export type PlayerPhase = (typeof PLAYER_STATES)[keyof typeof PLAYER_STATES];

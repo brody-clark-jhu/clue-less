@@ -45,14 +45,14 @@ export function onJoinLobbyClick(cb: JoinLobbyCallback) {
 }
 
 const ID_TO_LOCATION: Record<string, Locations> = {
-  "library": Rooms.Library,
-  "study": Rooms.Study,
-  "hall": Rooms.Hall,
-  "lounge": Rooms.Lounge,
+  library: Rooms.Library,
+  study: Rooms.Study,
+  hall: Rooms.Hall,
+  lounge: Rooms.Lounge,
   "dining-room": Rooms.DiningRoom,
-  "kitchen": Rooms.Kitchen,
-  "ballroom": Rooms.Ballroom,
-  "conservatory": Rooms.Conservatory,
+  kitchen: Rooms.Kitchen,
+  ballroom: Rooms.Ballroom,
+  conservatory: Rooms.Conservatory,
   "billiard-room": Rooms.BilliardRoom,
   "study-hall": Corridors.StudyHall,
   "hall-lounge": Corridors.HallLounge,
@@ -65,7 +65,7 @@ const ID_TO_LOCATION: Record<string, Locations> = {
   "dining-room-kitchen": Corridors.DiningRoomKitchen,
   "conservatory-ballroom": Corridors.ConservatoryBallroom,
   "ballroom-kitchen": Corridors.BallroomKitchen,
-  "lounge-dining-room":Corridors.LoungeDiningRoom,
+  "lounge-dining-room": Corridors.LoungeDiningRoom,
 };
 
 export class View {

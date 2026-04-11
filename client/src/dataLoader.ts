@@ -1,4 +1,3 @@
-
 // load notebook data from file
 export async function loadNotebookData(): Promise<{ item: string }[]> {
   console.log("loading notebook data...");

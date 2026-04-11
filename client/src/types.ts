@@ -15,7 +15,7 @@ export interface MovePayload {
 }
 export interface SuggestionPayload {
   suspect: string;
-  weapon: string
+  weapon: string;
 }
 export interface AccusationPayload {
   suspect: string;
@@ -30,7 +30,7 @@ export type ClientCommand =
   | { type: "move"; payload: MovePayload }
   | { type: "suggest"; payload: MovePayload }
   | { type: "accuse"; payload: MovePayload }
-  | { type: "disprove"; payload: MovePayload }
+  | { type: "disprove"; payload: MovePayload };
 
 export type ServerEvent =
   | { type: "player_joined"; payload: PlayerJoinedEvent }

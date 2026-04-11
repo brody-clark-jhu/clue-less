@@ -1,5 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { onAccuseButtonClick, onBoardClick, onEndTurnButtonClick, onJoinLobbyClick, onMoveButtonClick, onSuggestionButtonClick, View, } from "../view";
+import {
+  onAccuseButtonClick,
+  onBoardClick,
+  onEndTurnButtonClick,
+  onJoinLobbyClick,
+  onMoveButtonClick,
+  onSuggestionButtonClick,
+  View,
+} from "../view";
 
 describe("View", () => {
   let lobbyScreen: HTMLElement;
@@ -19,20 +27,19 @@ describe("View", () => {
     document.body.appendChild(lobbyScreen);
     document.body.appendChild(buttonEl);
     document.body.appendChild(gameBoardScreen);
-
   });
 
   afterEach(() => {
     document.body.innerHTML = "";
     // Restore callbacks
-    onAccuseButtonClick(() => { });
-    onSuggestionButtonClick(() => { });
-    onMoveButtonClick(() => { });
-    onJoinLobbyClick(() => { });
-    onEndTurnButtonClick(() => { });
+    onAccuseButtonClick(() => {});
+    onSuggestionButtonClick(() => {});
+    onMoveButtonClick(() => {});
+    onJoinLobbyClick(() => {});
+    onEndTurnButtonClick(() => {});
     vi.restoreAllMocks();
-    lobbyScreen.classList = '';
-    gameBoardScreen.classList = '';
+    lobbyScreen.classList = "";
+    gameBoardScreen.classList = "";
   });
 
   it("ShowLobbyScreen updates the display element", () => {
@@ -138,10 +145,7 @@ describe("View", () => {
 
     const v = new View();
 
-    v.ShowGameBoardScreen([
-      { item: "Knife" },
-      { item: "Candlestick" },
-    ]);
+    v.ShowGameBoardScreen([{ item: "Knife" }, { item: "Candlestick" }]);
 
     expect(notebookList.children.length).toBe(2);
     expect(notebookList.textContent).toContain("Knife");

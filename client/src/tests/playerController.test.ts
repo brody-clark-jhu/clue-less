@@ -13,7 +13,7 @@ describe("PlayerController.start", () => {
       connectWebSocket: vi.fn().mockResolvedValue(undefined),
       onMessage: vi.fn((handler: any) => {
         fakeClient._handler = handler;
-        return () => { };
+        return () => {};
       }),
     };
 
@@ -26,8 +26,8 @@ describe("PlayerController.start", () => {
       SetPlayerText: vi.fn(),
     };
 
-    const mockData = [{ item: 'Candlestick' }, { item: 'Revolver' }];
-    vi.spyOn(dataLoader, 'loadNotebookData').mockResolvedValue(mockData);
+    const mockData = [{ item: "Candlestick" }, { item: "Revolver" }];
+    vi.spyOn(dataLoader, "loadNotebookData").mockResolvedValue(mockData);
 
     const pc = new PlayerController(fakeClient as any, fakeView as any);
     await pc.start();
@@ -49,7 +49,6 @@ describe("PlayerController.start", () => {
     // expect(fakeView.ShowLobbyScreen).toHaveBeenCalled();
 
     // Simulate a game_update where the current player has clickCount 3
-
   });
 
   it("Connects websocket on join lobby button click", () => {
