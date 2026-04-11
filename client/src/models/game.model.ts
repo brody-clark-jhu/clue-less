@@ -18,43 +18,6 @@ export type Weapon =
   | "Candlestick"
   | "Revolver";
 
-// //Defining the different rooms where only one may be selected.
-// export type Room =
-//   | "Study"
-//   | "Hall"
-//   | "Lounge"
-//   | "Library"
-//   | "Billard Room"
-//   | "Dining Room"
-//   | "Conservatory"
-//   | "Ballroom"
-//   | "Kitchen";
-
-// //Defining the different Corridors where only one may be selected.
-// export type Corridor =
-//   | "Study-Hall" //first row
-//   | "Hall-Lounge" //first row
-//   | "Study-Library" //second row
-//   | "Hall-Billard Room" //second row
-//   | "Lounge-Dining Room" //second row
-//   | "Library-Billard Room" //Third row
-//   | "Billard Room-Dining Room" //third row
-//   | "Library-Conservatory" //fourth row
-//   | "Billard Room-Ballroom" //fourth row
-//   | "Dining Room-Kitchen" //fourth Row
-//   | "Conservatory-Ballroom" //fifth Row
-//   | "Ballroom-Kitchen"; //fifth row
-
-// //Defining the different SecretPassage where only one may be selected
-// export type SecretPassage =
-//   | "Study-Kitchen"
-//   | "Kitchen-Study"
-//   | "Lounge-Conservatory"
-//   | "Conservatory-Lounge";
-
-// //Defining the possible locations where only one may be selected
-// export type Location = Room | Corridor | SecretPassage;
-
 export const Rooms = {
   Study: "Study",
   Hall: "Hall",
@@ -95,20 +58,6 @@ export type SecretPassages =
   (typeof SecretPassages)[keyof typeof SecretPassages];
 
 export type Locations = Rooms | Corridors | SecretPassages;
-
-export const PLAYER_STATES = {
-  Study: "Study",
-  Hall: "Hall",
-  Active: 3,
-  Move: 4,
-  Suggest: 5,
-  Accuse: 6,
-  Disprove: 7,
-  Eliminated: 8,
-  Start: 9,
-} as const;
-
-export type PlayerPhase = (typeof PLAYER_STATES)[keyof typeof PLAYER_STATES];
 
 //Defining the possible Cards available for a players hand
 export interface PlayerCards {
