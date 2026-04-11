@@ -2,92 +2,17 @@
 Model: game_model.py
 Definition: This model creates all the classes that will be utlizied thoughout the game
 """
-class PlayerState:
-    """
-    Represents the mutable state of one player in a game of Clue.
 
-    Attributes:
-        playerId (str):         Server-assigned UUID.
-        displayName (str):      Lobby-chosen display name (e.g. "Player 1").
-        character (str):        Selected Clue character.
-        location (str):         Current board location ID.
-        hand (list[str]):       Private card names held by this player.
-        eliminated (bool):      True after a wrong accusation.
-        is_host (bool):         True for the first player to join.
-        moved_this_turn (bool): Reset to False at the start of each turn.
-        must_suggest (bool):    True after the player enters a room.
-        dragged_to_room (bool): True if the player was placed by a suggestion.
-    """
+import random
 
-    def __init__(self, playerId: str):
-        if not playerId:
-            raise ValueError("playerId is required and cannot be empty.")
-
-        self.playerId = playerId
-        self.displayName: str = ""
-        self.character: str = ""
-        self.location: str = ""
-        self.hand: list[str] = []
-        self.eliminated: bool = False
-        self.is_host: bool = False
-        self.moved_this_turn: bool = False
-        self.must_suggest: bool = False
-        self.dragged_to_room: bool = False
-
-    #Verifies the location of where the player is in, if this is a room
-    def _in_room(self) -> bool:
-        return "-" not in self.location and self.location != ""
-
-    #Operations for the gamestate
-
-    #Checks if the player can move 
-    def can_move(self) -> bool:
-        return not self.eliminated and not self.moved_this_turn
-
-    #Checks if a player can make a suggestion, based on the criteria
-    def can_suggest(self) -> bool:
-        return (
-            self._in_room()
-            and (self.must_suggest or self.dragged_to_room)
-            and not self.eliminated
-        )
-
-    #Checks if the player is allowed to make an accusation based on if they are eliminated.
-    def can_accuse(self) -> bool:
-        return not self.eliminated
-
-    #returns the set of cards in the players hand that matches a suggestion
-    def matches_suggestion(self, suspect: str, weapon: str, room: str) -> list[str]:
-        suggested = {suspect, weapon, room}
-        return [card for card in self.hand if card in suggested]
-
-    #resets the current turn after a player has moved.
-    def reset_turn_flags(self) -> None:
-        self.moved_this_turn = False
-        self.must_suggest = False
-        self.dragged_to_room = False
-
-    def __repr__(self) -> str:
-        return (
-            f"PlayerState(playerId={self.playerId!r}, "
-            f"displayName={self.displayName!r}, "
-            f"character={self.character!r}, "
-            f"location={self.location!r}, "
-            f"eliminated={self.eliminated})"
-        )
-    
-
-
-
-"""Defines BoardState that will enforce constraints for the different rooms and help with locations"""
 class BoardState:
- def __init__(self):
+    """Board topology, occupancy tracking, and move validation."""
+    def __init__(self):
         self.rooms: set[str] = {
             "Study", "Hall", "Lounge", "Library",
             "Billiard Room", "Dining Room",
-            "Conservatory", "Ballroom", "Kitchen"
+            "Conservatory", "Ballroom", "Kitchen",
         }
- 
         self.corridors: set[str] = {
             "study-hall", "study-library",
             "hall-lounge", "hall-billiard-room",
@@ -96,11 +21,9 @@ class BoardState:
             "billiard-room-dining-room", "billiard-room-ballroom",
             "dining-room-kitchen",
             "conservatory-ballroom",
-            "ballroom-kitchen"
+            "ballroom-kitchen",
         }
- 
         self.adjacency: dict[str, list[str]] = {
-            # Rooms
             "Study":         ["study-hall", "study-library"],
             "Hall":          ["study-hall", "hall-lounge", "hall-billiard-room"],
             "Lounge":        ["hall-lounge", "lounge-dining-room"],
@@ -111,7 +34,6 @@ class BoardState:
             "Conservatory":  ["library-conservatory", "conservatory-ballroom"],
             "Ballroom":      ["billiard-room-ballroom", "conservatory-ballroom", "ballroom-kitchen"],
             "Kitchen":       ["dining-room-kitchen", "ballroom-kitchen"],
-            # Corridors
             "study-hall":               ["Study", "Hall"],
             "study-library":            ["Study", "Library"],
             "hall-lounge":              ["Hall", "Lounge"],
@@ -119,33 +41,166 @@ class BoardState:
             "lounge-dining-room":       ["Lounge", "Dining Room"],
             "library-billiard-room":    ["Library", "Billiard Room"],
             "library-conservatory":     ["Library", "Conservatory"],
-            "billiard-room-dining-room":["Billiard Room", "Dining Room"],
+            "billiard-room-dining-room": ["Billiard Room", "Dining Room"],
             "billiard-room-ballroom":   ["Billiard Room", "Ballroom"],
             "dining-room-kitchen":      ["Dining Room", "Kitchen"],
             "conservatory-ballroom":    ["Conservatory", "Ballroom"],
             "ballroom-kitchen":         ["Ballroom", "Kitchen"],
         }
- 
         self.secret_passages: dict[str, str] = {
             "Study":        "Kitchen",
             "Kitchen":      "Study",
             "Lounge":       "Conservatory",
             "Conservatory": "Lounge",
         }
- 
-        # location_id -> character name or None
         self.occupants: dict[str, str | None] = {
             loc: None for loc in list(self.rooms) + list(self.corridors)
         }
- 
         self.starting_positions: dict[str, str] = {
-            "Professor Plum": "study-library",
-            "Miss Scarlet":   "hall-lounge",
+            "Professor Plum":  "study-library",
+            "Miss Scarlet":    "hall-lounge",
             "Colonel Mustard": "lounge-dining-room",
-            "Mrs. White":     "ballroom-kitchen",
-            "Mr. Green":      "conservatory-ballroom",
-            "Mrs. Peacock":   "library-conservatory",
+            "Mrs. White":      "ballroom-kitchen",
+            "Mr. Green":       "conservatory-ballroom",
+            "Mrs. Peacock":    "library-conservatory",
         }
 
-        #TODO add card class and operations for BoardState
+    def validate_move(self, current_location: str, destination: str) -> None:
+        """Raise ValueError if the move is not legal."""
+        neighbors = self.adjacency.get(current_location, [])
+        secret_dest = self.secret_passages.get(current_location)
 
+        if destination not in neighbors and destination != secret_dest:
+            raise ValueError(f"Invalid move from {current_location} to {destination}")
+        
+        if destination in self.corridors and self.occupants.get(destination) is not None:
+            raise ValueError(f"Corridor {destination} is already occupied")
+        
+    def move(self, character: str, old_location: str, destination: str) -> None:
+        """Update occupants map for a player move."""
+        self.occupants[old_location] = None
+        self.occupants[destination] = character
+
+    def move_suspect(self, character: str, room: str) -> None:
+        """Teleport a character to a room for a suggestion."""
+        for loc, occ in self.occupants.items():
+            if occ == character:
+                self.occupants[loc] = None
+                break
+        self.occupants[room] = character
+
+    def available_moves(self, current_location: str) -> list[str]:
+        """Return list of legal destinations from a location."""
+        moves = []
+        for dest in self.adjacency.get(current_location, []):
+            if dest in self.corridors and self.occupants.get(dest) is not None:
+                continue
+            moves.append(dest)
+        
+        secret_dest = self.secret_passages.get(current_location)
+        if secret_dest:
+            moves.append(secret_dest)
+
+        return moves
+
+    def place_starting_positions(self, players) -> None:
+        """Place each player's character on their starting corridor."""
+        for player in players:
+            corridor = self.starting_positions.get(player.character)
+            if corridor:
+                self.occupants[corridor] = player.character
+                player.location = corridor
+        
+
+class CardDeck: 
+    """Holds all 21 CLue cards, seals the solution enveloppe, and deals cards to players."""
+    
+    SUSPECTS = [
+        "Colonel Mustard", "Miss Scarlet", "Professor Plum",
+        "Mr. Green", "Mrs. White", "Mrs. Peacock",
+    ]
+    WEAPONS = [
+        "Rope", "Lead Pipe", "Knife",
+        "Wrench", "Candlestick", "Revolver",
+    ]
+    ROOMS = [
+        "Study", "Hall", "Lounge", "Library",
+        "Billiard Room", "Dining Room",
+        "Conservatory", "Ballroom", "Kitchen",
+    ]
+
+    def __init__(self):
+        self.solution : dict[str, str] = {}
+        self.sealed: bool = False
+
+    def seal_solution(self) -> None:
+        """Randomly select one suspect, weapon, and room as the winning answer."""
+        self.solution = {
+            "suspect": random.choice(self.SUSPECTS),
+            "weapon": random.choice(self.WEAPONS),
+            "room": random.choice(self.ROOMS),
+        }
+        self.sealed = True
+
+    def deal(self, players) -> None:
+        """Shuffle the 18 remaining cards and distribute round-robin to players."""
+        remaining = (
+            [s for s in self.SUSPECTS if s != self.solution["suspect"]]
+            + [w for w in self.WEAPONS if w != self.solution["weapon"]]
+            + [r for r in self.ROOMS if r != self.solution["room"]]
+        )
+        random.shuffle(remaining)
+        for i, card in enumerate(remaining):
+            players[i % len(players)].hand.append(card)
+    
+    def check_solution(self, suspect: str, weapon: str, room: str) -> bool:
+        """Return True if the accusation matches the sealed solution."""
+        return (
+            self.solution.get("suspect") == suspect
+            and self.solution.get("weapon") == weapon
+            and self.solution.get("room") == room
+        )
+
+class SuggestionManager:
+    """Manages one disproof cycle. Created on suggestion, destroyed on resolution."""
+
+    def __init__(
+        self,
+        suggesting_player_id: str,
+        suspect: str,
+        weapon: str,
+        room: str,
+        turn_order: list[str],
+    ):
+        self.suggesting_player_id = suggesting_player_id
+        self.suspect = suspect
+        self.weapon = weapon
+        self.room = room
+        self.disproof_queue: list[str] = []
+        self.current_index: int = 0
+        self.resolved: bool = False
+        self._build_queue(turn_order)
+
+    def _build_queue(self, turn_order: list[str]) -> None:
+        """Build clockwise disproof order starting after the suggester."""
+        idx = turn_order.index(self.suggesting_player_id)
+        n = len(turn_order)
+        self.disproof_queue = [
+            turn_order[(idx + i) % n]
+            for i in range(1, n)
+        ]
+
+    def current_disproving_player(self) -> str | None:
+        """Return the player ID who must respond next, or None if exhausted."""
+        if self.current_index < len(self.disproof_queue):
+            return self.disproof_queue[self.current_index]
+        return None
+
+    def advance(self) -> str | None:
+        """Move to the next candidate and return their ID, or None if exhausted."""
+        self.current_index += 1
+        return self.current_disproving_player()
+
+    def is_exhausted(self) -> bool:
+        """Return True if all candidates have been asked."""
+        return self.current_index >= len(self.disproof_queue)
