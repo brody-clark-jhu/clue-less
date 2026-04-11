@@ -110,7 +110,7 @@ button:focus-visible {
 /* For Home PAGE */
 /* Image for Home-page pic*/
 #landing-screen {
-  background-image: url('/images/background_home.jpg');
+  background-image: url("../images/background_home.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -118,8 +118,8 @@ button:focus-visible {
 
 /* Gold outline on the CLUELESS title */
 .landing-title {
-  -webkit-text-stroke: 2px #C9A84C;
-  font-family: 'Montserrat', sans-serif;
+  -webkit-text-stroke: 2px #c9a84c;
+  font-family: "Montserrat", sans-serif;
   font-weight: 900;
 }
 

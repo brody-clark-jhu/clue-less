@@ -33,10 +33,14 @@ describe("Client", () => {
 
     // forward incoming socket messages to client's handlers
     (c as any).socket.onmessage = (ev: any) => {
-    const parsed = JSON.parse(ev.data);
-    (c as any).messageHandlers.forEach((h: any) => {
-        try { h(parsed); } catch (e) { /* noop */ }
-    });
+      const parsed = JSON.parse(ev.data);
+      (c as any).messageHandlers.forEach((h: any) => {
+        try {
+          h(parsed);
+        } catch (e) {
+          /* noop */
+        }
+      });
     };
 
     const received = new Promise<ServerEvent>((resolve) => {
@@ -63,7 +67,7 @@ describe("Client", () => {
     });
   });
 
-   it("connectWebSocket installs onmessage and subscribers receive server events", async () => {
+  it("connectWebSocket installs onmessage and subscribers receive server events", async () => {
     class MockWS {
       static OPEN = 1;
       onopen: ((ev?: any) => void) | null = null;
@@ -103,9 +107,9 @@ describe("Client", () => {
 
     const ev = await msgPromise;
     expect(ev.type).toBe("game_update");
-    if (ev.type == "game_update"){
-        const gs: GameState = ev.payload;
-        expect(gs!.playerStates[0].playerId).toBe("p1");
-    } 
+    if (ev.type == "game_update") {
+      const gs: GameState = ev.payload;
+      expect(gs!.playerStates[0].playerId).toBe("p1");
+    }
   });
 });
