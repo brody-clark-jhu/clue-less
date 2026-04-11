@@ -28,9 +28,9 @@ export interface DisprovePayload {
 
 export type ClientCommand =
   | { type: "move"; payload: MovePayload }
-  | { type: "suggest"; payload: MovePayload }
-  | { type: "accuse"; payload: MovePayload }
-  | { type: "disprove"; payload: MovePayload };
+  | { type: "suggest"; payload: SuggestionPayload }
+  | { type: "accuse"; payload: AccusationPayload }
+  | { type: "disprove"; payload: DisprovePayload };
 
 export type ServerEvent =
   | { type: "player_joined"; payload: PlayerJoinedEvent }
