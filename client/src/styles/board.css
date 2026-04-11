@@ -1,0 +1,199 @@
+/* Basic resets and layout */
+html,
+body,
+#game-board-screen {
+  height: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  background-image: url(../images/background_board.png);
+}
+
+/* Header */
+#header-bar {
+  display: flex;
+  flex-direction: row;
+  gap: 5em;
+  width: 100%;
+  align-items: center;
+  padding: 1rem;
+  max-height: 2em;
+  margin-left: 2em;
+}
+
+#title {
+  font-size: 3rem;
+  margin: 0;
+}
+
+#hand-display {
+  align-self: center;
+}
+
+#player-hand-list {
+  text-align: center;
+  align-content: center;
+}
+
+.hand-item,
+#hand-item {
+  display: flex;
+  flex-direction: row;
+  text-align: center;
+}
+
+/* Game screen container uses column flex so header stays at top */
+#game-board-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+#body {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+  width: 100%;
+  height: calc(
+    100vh - 60px
+  ); /* Adjust '60px' to the height of your actual header */
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: hidden; /* Prevents the body itself from scrolling */
+}
+
+#board-wrapper {
+  background-color: gray;
+  flex: 2;
+  margin: 2em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  box-sizing: border-box;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 8%;
+}
+#board-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  width: 100%;
+  position: relative;
+}
+
+#board-container img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+#board-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 2; /* Takes up more space than the notebook */
+}
+/* Bottom controls: smaller fixed-height bar below the board */
+#button-bar {
+  display: flex;
+  flex-direction: row;
+  flex: 0 0 auto;
+  height: 72px;
+  width: 100%;
+  align-self: stretch;
+  padding: 0.5rem;
+  box-sizing: border-box;
+  justify-content: center;
+  gap: 1.5rem;
+}
+area {
+  cursor: pointer;
+}
+#player-profile {
+  background-color: black;
+  border-radius: 100%;
+  min-width: 4rem;
+  min-height: 4rem;
+  margin-right: 3em;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+#player-capsule {
+  display: flex;
+  flex-direction: row;
+  flex: content;
+  align-content: center;
+  align-items: center;
+  background-color: yellow;
+  margin: 0;
+  padding: 2em;
+  border-radius: 20%;
+  min-height: 0.5rem;
+}
+
+#player-text {
+  font-size: 12px;
+  margin: 0;
+  padding: 0;
+  color: darkgray;
+}
+
+#move {
+  border-radius: 100%;
+}
+
+#end-turn {
+  border-radius: 100%;
+}
+
+#notebook-title {
+  text-align: center;
+  padding-bottom: 0.5rem;
+}
+
+#notebook {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 20%;
+  padding: 1rem;
+  box-sizing: border-box;
+  background-color: grey;
+  margin: 2em;
+  border-radius: 8%;
+}
+
+#notebook-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.notebook-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0;
+  text-align: center;
+}
+
+input[type="checkbox"] {
+  width: 12px;
+  height: 12px;
+  margin: 0;
+}
+
+.notebook-item label {
+  font-size: 14px;
+  padding-left: 1rem;
+}
+
+input[type="checkbox"]:checked + label {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
