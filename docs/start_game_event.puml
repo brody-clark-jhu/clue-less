@@ -1,0 +1,40 @@
+@startuml
+title Game Start Scenario (Server-Side)
+
+autonumber
+
+participant Server
+participant GameManager
+participant GameState
+participant CardDeck
+participant GameBoard
+
+Server -> GameManager : handle_command(START_GAME)
+
+' Validation handled internally
+GameManager -> GameManager : validate players >= 2 and caller is host
+
+alt Valid start
+
+    ' Deck setup
+    GameManager -> CardDeck : seal_solution()
+    GameManager -> CardDeck : deal(playerStates)
+
+    ' Board setup
+    GameManager -> GameBoard : place_starting_positions(players)
+
+    ' Initialize game state
+    GameManager -> GameState : set turn_order
+    GameManager -> GameState : current_turn_index = 0
+    GameManager -> GameState : phase = active
+
+    ' Send responses
+    GameManager --> Server : deal_cards (private to each player)
+    GameManager --> Server : game_state_update (broadcast)
+
+else Invalid start
+    GameManager --> Server : error_response
+
+end
+
+@enduml

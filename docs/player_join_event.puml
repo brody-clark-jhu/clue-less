@@ -1,0 +1,21 @@
+@startuml
+title Player Join Scenario (Server-Side)
+
+autonumber
+
+participant Server
+participant GameManager
+participant GameState
+
+Server -> GameManager : handle_command(JOIN)
+
+' GameManager creates and registers player
+GameManager -> GameManager : create PlayerState(player_id)
+GameManager -> GameState : add_player(player)
+
+' Return responses to server
+GameManager --> Server : WelcomeResponse (targeted)
+GameManager --> Server : PlayerJoinedEvent (broadcast)
+GameManager --> Server : game_state_update
+
+@enduml

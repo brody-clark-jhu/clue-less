@@ -1,0 +1,51 @@
+@startuml
+title Suggestion Scenario (Server-Side, Event-Driven)
+
+autonumber
+
+participant Server
+participant GameManager
+participant GameState
+participant SuggestionManager
+participant Player
+
+' Initial suggestion
+Server -> GameManager : handle_command(SUGGESTION)
+
+GameManager -> GameState : Record Suggestion
+GameManager -> SuggestionManager : <<create>>(suggestion, turn_order)
+
+' Ask first player to disprove
+GameManager -> SuggestionManager : getCurrentPlayer()
+SuggestionManager --> GameManager : player_id
+
+GameManager --> Server : disprove_request(player_id)
+
+Server -> Player : Request Refutation Card
+
+loop Disproof cycle
+    Player -> Server : response(card OR cannot_disprove)
+    Server -> GameManager : handle_command(DISPROVE)
+
+    alt Player provides card
+        GameManager -> SuggestionManager : resolve(card)
+        GameManager -> GameState : Record Refutation
+        GameManager --> Server : suggestion_disproved + game_state_update
+        break
+    else Player cannot disprove
+        GameManager -> SuggestionManager : advance()
+
+        alt Next player exists
+            GameManager -> SuggestionManager : getCurrentPlayer()
+            SuggestionManager --> GameManager : next_player_id
+            GameManager --> Server : disprove_request(next_player_id)
+            Server -> Player : Request Refutation Card
+        else No players left
+            GameManager -> GameState : Mark Suggestion Unrefuted
+            GameManager --> Server : suggestion_unchallenged + game_state_update
+            break
+        end
+    end
+end
+
+@enduml
