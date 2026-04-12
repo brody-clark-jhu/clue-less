@@ -1,13 +1,29 @@
-export type PlayerState = { playerId: string; clickCount: number };
+export type PlayerState = {
+  playerId: string;
+  displayName: string;
+  character: string;
+  location: string;
+  hand: string[];
+  eliminated: boolean;
+  is_host: boolean;
+  moved_this_turn: boolean;
+  must_suggest: boolean;
+  dragged_to_room: boolean;
+};
+
+export interface GameState {
+  playerStates: PlayerState[];
+  turn_order: string[];
+  current_turn_index: number;
+  phase: string;
+  suggestion_pending: boolean;
+}
 
 export interface WelcomeResponse {
   playerId: string;
 }
 export interface PlayerJoinedEvent {
   playerId: string;
-}
-export interface GameState {
-  playerStates: PlayerState[];
 }
 
 export interface MovePayload {
@@ -35,6 +51,7 @@ export type ClientCommand =
 export type ServerEvent =
   | { type: "player_joined"; payload: PlayerJoinedEvent }
   | { type: "welcome"; payload: WelcomeResponse }
-  | { type: "game_update"; payload: GameState };
+  | { type: "game_update"; payload: GameState }
+  | {type: "error"; payload: {message: string}};
 
 export type Message = ClientCommand | ServerEvent;

@@ -132,6 +132,15 @@ export class PlayerController {
         this.setPlayerPhase(PLAYER_STATES.Start);
         break;
       }
+      case "game_update":{
+        console.log("Received game update from server");
+        break;
+      }
+      case "error": {
+        console.error(`Error: ${event.payload.message}`);
+      }
+
+
     }
   }
 
