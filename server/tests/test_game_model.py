@@ -8,11 +8,11 @@ from src.game_model import BoardState, CardDeck, SuggestionManager
 class TestBoardStateValidateMove:
     def test_valid_adjacent_move(self):
         board = BoardState()
-        board.validate_move("Study", "study-hall")
+        board.validate_move("Study", "Study-Hall")
 
     def test_valid_corridor_to_room(self):
         board = BoardState()
-        board.validate_move("study-hall", "Hall")
+        board.validate_move("Study-Hall", "Hall")
 
     def test_invalid_non_adjacent(self):
         board = BoardState()
@@ -25,31 +25,31 @@ class TestBoardStateValidateMove:
 
     def test_occupied_corridor_rejected(self):
         board = BoardState()
-        board.occupants["study-hall"] = "Miss Scarlet"
+        board.occupants["Study-Hall"] = "Miss Scarlet"
         with pytest.raises(ValueError, match="occupied"):
-            board.validate_move("Study", "study-hall")
+            board.validate_move("Study", "Study-Hall")
 
     def test_room_allows_multiple(self):
         board = BoardState()
         board.occupants["Kitchen"] = "Miss Scarlet"
-        board.validate_move("dining-room-kitchen", "Kitchen")
+        board.validate_move("Dining Room-Kitchen", "Kitchen")
 
 
 class TestBoardStateMove:
     def test_move_updates_occupants(self):
         board = BoardState()
-        board.occupants["study-hall"] = "Professor Plum"
-        board.move("Professor Plum", "study-hall", "Study")
-        assert board.occupants["study-hall"] is None
+        board.occupants["Study-Hall"] = "Professor Plum"
+        board.move("Professor Plum", "Study-Hall", "Study")
+        assert board.occupants["Study-Hall"] is None
         assert board.occupants["Study"] == "Professor Plum"
 
 
 class TestBoardStateMoveSuspect:
     def test_teleports_character(self):
         board = BoardState()
-        board.occupants["study-hall"] = "Miss Scarlet"
+        board.occupants["Study-Hall"] = "Miss Scarlet"
         board.move_suspect("Miss Scarlet", "Kitchen")
-        assert board.occupants["study-hall"] is None
+        assert board.occupants["Study-Hall"] is None
         assert board.occupants["Kitchen"] == "Miss Scarlet"
 
     def test_teleport_character_not_on_board(self):
@@ -62,20 +62,20 @@ class TestBoardStateAvailableMoves:
     def test_from_room(self):
         board = BoardState()
         moves = board.available_moves("Study")
-        assert "study-hall" in moves
-        assert "study-library" in moves
+        assert "Study-Hall" in moves
+        assert "Study-Library" in moves
         assert "Kitchen" in moves  # secret passage
 
     def test_filters_occupied_corridors(self):
         board = BoardState()
-        board.occupants["study-hall"] = "Miss Scarlet"
+        board.occupants["Study-Hall"] = "Miss Scarlet"
         moves = board.available_moves("Study")
-        assert "study-hall" not in moves
-        assert "study-library" in moves
+        assert "Study-Hall" not in moves
+        assert "Study-Library" in moves
 
     def test_from_corridor(self):
         board = BoardState()
-        moves = board.available_moves("study-hall")
+        moves = board.available_moves("Study-Hall")
         assert "Study" in moves
         assert "Hall" in moves
 
@@ -95,10 +95,10 @@ class TestBoardStatePlaceStartingPositions:
             PlayerState(playerId="p2", character="Professor Plum"),
         ]
         board.place_starting_positions(players)
-        assert players[0].location == "hall-lounge"
-        assert players[1].location == "study-library"
-        assert board.occupants["hall-lounge"] == "Miss Scarlet"
-        assert board.occupants["study-library"] == "Professor Plum"
+        assert players[0].location == "Hall-Lounge"
+        assert players[1].location == "Study-Library"
+        assert board.occupants["Hall-Lounge"] == "Miss Scarlet"
+        assert board.occupants["Study-Library"] == "Professor Plum"
 
 
 class TestCardDeckSealSolution:
