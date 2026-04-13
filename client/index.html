@@ -42,11 +42,157 @@
 
   <!-- Lobby Screen -->
   <div id="lobby-screen" class="screen">
-    <div id="app">
-      <h1 id="display-message">Display Message</h1>
-      <button type="button" id="request">Request</button>
-      <div id="players"></div>
-    </div>
+    <div class="lobby-layout"> 
+        <h1 class="lobby-title">LOBBY</h1>
+
+      <!-- left pane: character selection cards -->
+      <div class="lobby-left"> 
+        <h2 class="lobby-pane-title">Choose Your Character</h2>
+        <div class="character-grid"> 
+
+          <!-- Miss Scarlet card -->
+          <button class="character-card" data-character="Miss Scarlet" type="button"> 
+            <div class="character-avatar avatar-scarlet"> 
+              <span class="character-initial">S</span> 
+            </div>
+            <div class="character-info"> 
+              <span class="character-name">Miss Scarlet</span> 
+              <span class="character-status" id="status-miss-scarlet">Available</span>
+            </div> 
+            <div class="character-select-indicator">✓</div>
+          </button>
+
+          <!-- Colonel Mustard card -->
+          <button class="character-card" data-character="Colonel Mustard" type="button">
+            <div class="character-avatar avatar-mustard">
+              <span class="character-initial">M</span>
+            </div>
+            <div class="character-info">
+              <span class="character-name">Colonel Mustard</span>
+              <span class="character-status" id="status-colonel-mustard">Available</span> 
+            </div> 
+            <div class="character-select-indicator">✓</div>
+          </button>
+
+          <!-- Mrs. White card -->
+          <button class="character-card" data-character="Mrs. White" type="button">
+            <div class="character-avatar avatar-white">
+              <span class="character-initial">W</span>
+            </div> 
+            <div class="character-info">
+              <span class="character-name">Mrs. White</span> 
+              <span class="character-status" id="status-mrs-white">Available</span>
+            </div> 
+            <div class="character-select-indicator">✓</div> 
+          </button> 
+
+          <!-- Mr. Green card -->
+          <button class="character-card" data-character="Mr. Green" type="button"> 
+            <div class="character-avatar avatar-green"> 
+              <span class="character-initial">G</span> 
+            </div> 
+            <div class="character-info"> 
+              <span class="character-name">Mr. Green</span> 
+              <span class="character-status" id="status-mr-green">Available</span> 
+            </div> 
+            <div class="character-select-indicator">✓</div> 
+          </button> 
+
+          <!-- Mrs. Peacock card -->
+          <button class="character-card" data-character="Mrs. Peacock" type="button"> 
+            <div class="character-avatar avatar-peacock"> 
+              <span class="character-initial">P</span> 
+            </div> 
+            <div class="character-info"> 
+              <span class="character-name">Mrs. Peacock</span> 
+              <span class="character-status" id="status-mrs-peacock">Available</span> 
+            </div> 
+            <div class="character-select-indicator">✓</div> 
+          </button> 
+
+          <!-- Professor Plum card -->
+          <button class="character-card" data-character="Professor Plum" type="button">
+            <div class="character-avatar avatar-plum"> 
+              <span class="character-initial">P</span> 
+            </div> 
+            <div class="character-info"> 
+              <span class="character-name">Professor Plum</span>
+              <span class="character-status" id="status-professor-plum">Available</span>
+            </div> 
+            <div class="character-select-indicator">✓</div> 
+          </button> 
+
+        </div> 
+      </div> 
+
+      <!-- right pane: player slots and action buttons -->
+      <div class="lobby-right"> 
+        <h2 class="lobby-pane-title">Players <span id="lobby-player-count">(0/6)</span></h2> 
+
+        <!-- six player slots -->
+        <div class="player-slots"> 
+          <div class="player-slot" id="slot-1"> 
+            <div class="slot-number">1</div> 
+            <div class="slot-info"> 
+              <span class="slot-label">Waiting...</span> 
+              <span class="slot-character"></span> 
+            </div> 
+            <div class="slot-badge"></div> 
+          </div> 
+          <div class="player-slot" id="slot-2"> 
+            <div class="slot-number">2</div> 
+            <div class="slot-info"> 
+              <span class="slot-label">Waiting...</span> 
+              <span class="slot-character"></span> 
+            </div> 
+            <div class="slot-badge"></div> 
+          </div> 
+          <div class="player-slot" id="slot-3"> 
+            <div class="slot-number">3</div> 
+            <div class="slot-info"> 
+              <span class="slot-label">Waiting...</span> 
+              <span class="slot-character"></span> 
+            </div> 
+            <div class="slot-badge"></div> 
+          </div> 
+          <div class="player-slot" id="slot-4">
+            <div class="slot-number">4</div> 
+            <div class="slot-info"> 
+              <span class="slot-label">Waiting...</span>
+              <span class="slot-character"></span> 
+            </div> 
+            <div class="slot-badge"></div> 
+          </div> 
+          <div class="player-slot" id="slot-5"> 
+            <div class="slot-number">5</div> 
+            <div class="slot-info"> 
+              <span class="slot-label">Waiting...</span> 
+              <span class="slot-character"></span> 
+            </div> 
+            <div class="slot-badge"></div> 
+          </div> 
+          <div class="player-slot" id="slot-6"> 
+            <div class="slot-number">6</div> 
+            <div class="slot-info"> 
+              <span class="slot-label">Waiting...</span> 
+              <span class="slot-character"></span>
+            </div> 
+            <div class="slot-badge"></div> 
+          </div>
+        </div> 
+
+        <!-- Ready Up and Start Game buttons -->
+        <div class="lobby-actions"> 
+          <button type="button" id="btn-ready-up" class="btn-ready" disabled>
+            Ready Up 
+          </button> 
+          <button type="button" id="btn-start-game" class="btn-start" style="display:none;"> 
+            Start Game 
+          </button> 
+        </div> 
+
+      </div> 
+    </div> 
   </div>
 
   <!-- Game board screen -->
@@ -64,7 +210,7 @@
       <div id="board-wrapper">
         <div id="board-container">
           <!-- Image Map Generated by http://www.image-map.net/ -->
-          <img src="./public/images/game_board.png" usemap="#image-map">
+          <img src="./images/game_board.png" usemap="#image-map">
           <map name="image-map">
             <area target="_self" alt="library" title="library" href="" coords="41,414,402,670" shape="rect">
             <area target="_self" alt="study" title="study" href="" coords="48,58,404,303" shape="rect">

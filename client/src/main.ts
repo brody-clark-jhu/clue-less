@@ -1,5 +1,6 @@
 import "./styles/board.css";
 import "./styles/style.css";
+import "./styles/lobby.css";
 import { Client } from "./client";
 import { PlayerController } from "./playerController";
 import { View } from "./view";

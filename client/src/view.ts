@@ -5,6 +5,7 @@ import {
   Corridors,
   SecretPassages
 } from "./models/game.model";
+import type { Character, LobbyPlayer } from "./types";
 
 type BoardClickCallback = (location: Locations) => void;
 let boardClickCallback: BoardClickCallback | undefined;
@@ -23,6 +24,15 @@ let accuseButtonClickCallback: AccuseButtonClickCallback | undefined;
 
 type EndTurnButtonClickCallback = () => void;
 let endTurnButtonClickCallback: EndTurnButtonClickCallback | undefined;
+
+type CharacterSelectCallback = (character: Character) => void; 
+let characterSelectCallback: CharacterSelectCallback | undefined; 
+
+type ReadyUpCallback = () => void;        
+let readyUpCallback: ReadyUpCallback | undefined; 
+
+type StartGameCallback = () => void;      
+let startGameCallback: StartGameCallback | undefined; 
 
 export function onBoardClick(cb: BoardClickCallback) {
   boardClickCallback = cb;
@@ -44,6 +54,18 @@ export function onEndTurnButtonClick(cb: EndTurnButtonClickCallback) {
 export function onJoinLobbyClick(cb: JoinLobbyCallback) {
   joinLobbyCallback = cb;
 }
+
+export function onCharacterSelectClick(cb: CharacterSelectCallback) {
+  characterSelectCallback = cb;                                      
+}                                                                     
+
+export function onReadyUpClick(cb: ReadyUpCallback) {
+  readyUpCallback = cb;                               
+}                                                     
+
+export function onStartGameClick(cb: StartGameCallback) { 
+  startGameCallback = cb;                                
+}                                                      
 
 const ID_TO_LOCATION: Record<string, Locations> = {
   library: Rooms.Library,
@@ -155,6 +177,32 @@ export class View {
         }
       });
     }
+
+    const characterGrid = document.querySelector(".character-grid"); 
+    if (characterGrid) {                                              
+      characterGrid.addEventListener("click", (e: Event) => {        
+        const card = (e.target as HTMLElement).closest(".character-card") as HTMLElement | null; 
+        if (!card || card.classList.contains("taken")) return;        
+        const character = card.dataset.character as Character;        
+        if (character && characterSelectCallback) {                  
+          characterSelectCallback(character);                        
+        }                                                             
+      });                                                           
+    }                                                                 
+
+    const readyBtn = document.getElementById("btn-ready-up"); 
+    if (readyBtn) {                                            
+      readyBtn.addEventListener("click", () => {             
+        if (readyUpCallback) readyUpCallback();               
+      });                                                      
+    }                                                          
+
+    const startBtn = document.getElementById("btn-start-game"); 
+    if (startBtn) {                                              
+      startBtn.addEventListener("click", () => {                
+        if (startGameCallback) startGameCallback();             
+      });                                                      
+    }                                                       
   }
 
   //Switch screens using the ID
@@ -247,4 +295,99 @@ export class View {
       player.textContent = `Player ${playerId}: ${text}`;
     }
   }
+
+  public UpdateLobbyPlayers(players: LobbyPlayer[], myPlayerId: string): void { 
+    const countEl = document.getElementById("lobby-player-count");          
+    if (countEl) countEl.textContent = `(${players.length}/6)`;                
+
+    //6 player slots in the right pane
+    for (let i = 1; i <= 6; i++) {                                              
+      const slot = document.getElementById(`slot-${i}`);                        
+      if (!slot) continue;                                                      
+
+      const player = players.find((p) => p.playerNumber === i);                 
+      const labelEl = slot.querySelector(".slot-label") as HTMLElement;        
+      const charEl = slot.querySelector(".slot-character") as HTMLElement;      
+      const badgeEl = slot.querySelector(".slot-badge") as HTMLElement;      
+
+      slot.classList.remove("occupied", "ready", "is-me", "is-host");        
+
+      if (player) {                                                             
+        slot.classList.add("occupied");                                        
+        labelEl.textContent = `Player ${player.playerNumber}`;                 
+        charEl.textContent = player.character ?? "No character selected";       
+
+        if (player.playerId === myPlayerId) slot.classList.add("is-me");        
+        if (player.isHost) {                                                    
+          slot.classList.add("is-host");                                  
+          badgeEl.textContent = "HOST";                                         
+        } else {                                                                  
+          badgeEl.textContent = "";                                           
+        }                                                                        
+        if (player.isReady) {                                                     
+          slot.classList.add("ready");                                          
+          if (!player.isHost) badgeEl.textContent = "READY";                     
+        }                                                                         
+      } else {                                                                    
+        // adds an empty slot for new players
+        labelEl.textContent = "Waiting...";                                     
+        charEl.textContent = "";                                                  
+        badgeEl.textContent = "";                                                 
+      }                                                                           
+    }                                                                             
+
+    //update character card availability in the left pane
+    const myPlayer = players.find((p) => p.playerId === myPlayerId);            
+    const myCharacter = myPlayer?.character ?? null;                             
+
+    document.querySelectorAll<HTMLElement>(".character-card").forEach((card) => { 
+      const char = card.dataset.character as Character;                      
+      const takenBy = players.find((p) => p.character === char);               
+      const statusEl = card.querySelector(".character-status") as HTMLElement;   
+
+      card.classList.remove("selected", "taken", "taken-by-me");                 
+
+      if (takenBy) {                                                              
+        if (takenBy.playerId === myPlayerId) {                                  
+          card.classList.add("taken-by-me");                                    
+          statusEl.textContent = "Selected (you)";                               
+        } else {                                                               
+          card.classList.add("taken");                                            
+          statusEl.textContent = `Taken by Player ${takenBy.playerNumber}`;     
+        }                                                                         
+      } else {                                                                    
+        statusEl.textContent = "Available";                                      
+      }                                                                           
+    });                                                                           
+
+    //enable Ready Up only after this player selects a character
+    const readyBtn = document.getElementById("btn-ready-up") as HTMLButtonElement | null; 
+    if (readyBtn) {                                                               
+      const hasCharacter = myCharacter !== null;                                
+      readyBtn.disabled = !hasCharacter;                                         
+      if (myPlayer?.isReady) {                                                
+        readyBtn.textContent = "Unready";                                        
+        readyBtn.classList.add("is-ready");                                    
+      } else {                                                                   
+        readyBtn.textContent = "Ready Up";                                       
+        readyBtn.classList.remove("is-ready");                                 
+      }                                                                        
+    }                                                                            
+
+    //Start game only available for the Host to see
+    const startBtn = document.getElementById("btn-start-game") as HTMLButtonElement | null; 
+    if (startBtn) {                                                               
+      const isHost = myPlayer?.isHost ?? false;                          
+      startBtn.style.display = isHost ? "block" : "none";                   
+    }                                                                           
+  }                                                                              
+
+  public SetCharacterSelected(character: Character | null): void {               
+    document.querySelectorAll<HTMLElement>(".character-card").forEach((card) => { 
+      card.classList.remove("selected");                                          
+      if (character && card.dataset.character === character) {                   
+        card.classList.add("selected");                                           
+      }                                                                           
+    });                                                                         
+  }                                                                              
 }

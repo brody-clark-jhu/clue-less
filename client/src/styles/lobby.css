@@ -1,0 +1,292 @@
+.lobby-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  background: #1a1208;
+  font-family: 'Montserrat', sans-serif;
+  color: #f0e6d0;
+  position: relative;                              
+  background-image: url('../images/background_lobby.jpg'); 
+  background-size: cover;                         
+  background-position: center;                 
+}
+
+.lobby-title {                                    
+  position: absolute;                             
+  top: 1.5rem;                                  
+  left: 50%;                                       
+  transform: translateX(-50%);                     
+  font-size: 2rem;                                
+  font-weight: 900;                                
+  letter-spacing: 0.3em;                          
+  color: #c9a84c;                                 
+  text-transform: uppercase;                       
+  z-index: 2;                                  
+  pointer-events: none;                           
+  margin: 0;                                 
+}                                                 
+
+.lobby-pane-title {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #c9a84c;
+  margin: 0 0 1.5rem 0;
+}
+
+.lobby-left {
+  flex: 1.1;
+  padding: 2.5rem;
+  border-right: 1px solid #3a2e1a;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.character-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.character-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #241c0e;
+  border: 1px solid #3a2e1a;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  text-align: left;
+  position: relative;
+  color: #f0e6d0;
+}
+
+.character-card:hover:not(:disabled) {
+  border-color: #c9a84c;
+  background: #2e2010;
+  transform: translateX(4px);
+}
+
+.character-card.taken {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.character-card.taken-by-me {
+  border-color: #4caf70;
+  background: #1a2e1e;
+  box-shadow: inset 0 0 0 1px #4caf70;
+}
+
+
+.character-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+
+.character-initial {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+
+.avatar-scarlet  { background: #8b1a1a; }
+.avatar-mustard  { background: #8b6914; }
+.avatar-white    { background: #5a5a5a; }
+.avatar-green    { background: #1a5c2a; }
+.avatar-peacock  { background: #1a3d8b; }
+.avatar-plum     { background: #5a1a8b; }
+
+.character-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+}
+
+
+.character-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.character-status {
+  font-size: 0.72rem;
+  color: #8a7a5a;
+  letter-spacing: 0.06em;
+}
+
+
+.character-card.taken-by-me .character-status {
+  color: #4caf70;
+}
+
+
+.character-select-indicator {
+  font-size: 1.1rem;
+  color: #c9a84c;
+  opacity: 0;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.character-card.selected .character-select-indicator,
+.character-card.taken-by-me .character-select-indicator {
+  opacity: 1;
+}
+
+.lobby-right {
+  flex: 0.9;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  background: rgba(26, 18, 8, 0.75); 
+  backdrop-filter: blur(4px);       
+}
+
+.player-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 1;
+}
+
+.player-slot {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #241c0e;
+  border: 1px solid #3a2e1a;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  transition: border-color 0.25s;
+}
+
+.player-slot.occupied { border-color: #5a4a2a; }
+
+.player-slot.ready    { border-color: #4caf70; }
+
+.player-slot.is-me    { border-color: #c9a84c; }
+
+.slot-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #3a2e1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #c9a84c;
+  flex-shrink: 0;
+}
+
+.slot-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1;
+}
+
+.slot-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #8a7a5a;
+}
+
+.player-slot.occupied .slot-label {
+  color: #f0e6d0;
+}
+
+.slot-character {
+  font-size: 0.72rem;
+  color: #8a7a5a;
+  letter-spacing: 0.04em;
+}
+
+.slot-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.player-slot.ready .slot-badge {
+  background: #1a3d22;
+  color: #4caf70;
+}
+
+.player-slot.is-host .slot-badge {
+  background: #3d2e0a;
+  color: #c9a84c;
+}
+
+.lobby-actions {
+  display: flex;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #3a2e1a;
+  margin-top: 1rem;
+}
+
+.btn-ready,
+.btn-start {
+  flex: 1;
+  padding: 0.85rem;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.btn-ready {
+  background: #c9a84c;
+  color: #1a1208;
+}
+
+.btn-ready:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-ready:not(:disabled):hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.btn-ready.is-ready {
+  background: #4caf70;
+  color: #0d1f13;
+}
+
+.btn-start {
+  background: #8b1a1a;
+  color: #f0e6d0;
+}
+
+.btn-start:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}

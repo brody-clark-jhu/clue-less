@@ -12,6 +12,8 @@ class PlayerState(BaseModel):
     moved_this_turn: bool = False
     must_suggest: bool = False
     dragged_to_room: bool = False
+    is_ready: bool = False      # added modification — tracks if player has readied up in lobby
+    player_number: int = 0      # added modification — 1-6 based on join order
 
     def _in_room(self) -> bool:
         return self.location != "" and "-" not in self.location
@@ -88,3 +90,26 @@ class WelcomeResponse(BaseModel):
 class PlayerJoinedEvent(BaseModel):
     """Event to notify players of a newly connected player."""
     playerId: str
+
+# added modification — lobby-specific response models
+
+class LobbyPlayer(BaseModel):                   # added modification — serialisable player entry for lobby_update
+    """Represents a single player's lobby state sent to all clients."""  # added modification
+    playerId: str                               # added modification
+    playerNumber: int                           # added modification — 1-6 based on join order
+    character: str | None = None               # added modification — None if not yet selected
+    isReady: bool = False                       # added modification
+    isHost: bool = False                        # added modification
+
+class LobbyUpdateEvent(BaseModel):              # added modification — broadcast when lobby state changes
+    """Broadcast to all clients when any lobby state changes."""  # added modification
+    players: list[LobbyPlayer]                 # added modification
+
+class CharacterSelectedEvent(BaseModel):        # added modification — broadcast when a character is claimed
+    """Broadcast to all clients when a character is claimed or released."""  # added modification
+    playerId: str                               # added modification
+    character: str | None = None               # added modification — None means released
+
+class GameStartedEvent(BaseModel):              # added modification — broadcast when host starts game
+    """Broadcast to all clients when the host starts the game."""  # added modification
+    startingPlayerId: str                       # added modification — player whose turn is first
