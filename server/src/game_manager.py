@@ -85,6 +85,7 @@ class GameManager:
             "accuse": self._handle_accusation,
             "disprove": self._handle_disprove,
             "cannot_disprove": self._handle_cannot_disprove,
+            "select_character": self._handle_character_select,
         }
 
         handler = handlers.get(validated.type)
@@ -92,6 +93,23 @@ class GameManager:
             return [self._error(player_id, f"unsupported command: {validated.type}")]
         return handler(player_id, validated.payload)
 
+    def _handle_character_select(self, player_id: str, payload: dict) -> Responses:
+        """Update Player character choices"""
+        player = self._get_player(player_id)
+        if not player:
+            return [self._error(player_id, "player not found")]
+        character = payload.get("character", None)
+        if not character or character not in self.deck.SUSPECTS:
+            return [self._error(player_id, "invalid character")]
+        if any(p.character == character for p in self.game_state.playerStates):
+            return [self._error(player_id, "character already taken")]
+        
+        player.character = character
+        responses: Responses = []
+        responses.append((None, self._game_update()))
+        return responses
+
+                
     def _handle_start_game(self, player_id: str, payload: dict) -> Responses:
         """Seal solution, deal cards, place players, begin the game."""
         player = self._get_player(player_id)
@@ -101,6 +119,8 @@ class GameManager:
             return [self._error(player_id, "game already started")]
         if len(self.game_state.playerStates) < 2:
             return [self._error(player_id, "need at least 2 players")]
+        if any(len(p.character) == 0 for p in self.game_state.playerStates):
+             return [self._error(player_id, "not all players are ready")]
         
         self.deck.seal_solution()
         self.deck.deal(self.game_state.playerStates)
@@ -134,7 +154,7 @@ class GameManager:
         if not player.can_move():
             return [self._error(player_id, "cannot move right now")]
         destination = self._normalize(payload.get("destination", ""))
-        
+        _logger.debug("Player %s moving to %s", player_id, destination)
         try:
             self.board.validate_move(player.location, destination)
         except ValueError as e:

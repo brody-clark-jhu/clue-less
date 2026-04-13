@@ -2,198 +2,288 @@
 html,
 body,
 #game-board-screen {
-  height: 100%;
-  margin: 0;
-  box-sizing: border-box;
-  background-image: url(../images/background_board.png);
+    height: 100%;
+    margin: 0;
+    box-sizing: border-box;
+    background-image: url(../images/background_board.png);
 }
 
 /* Header */
 #header-bar {
-  display: flex;
-  flex-direction: row;
-  gap: 5em;
-  width: 100%;
-  align-items: center;
-  padding: 1rem;
-  max-height: 2em;
-  margin-left: 2em;
+    display: flex;
+    flex-direction: row;
+    gap: 5em;
+    align-items: center;
+    padding: 1rem;
+    max-height: 2em;
+    margin-left: 2em;
+    width: 80%;
 }
 
 #title {
-  font-size: 3rem;
-  margin: 0;
+    font-size: 3rem;
+    width: 20rem;
+    padding-left: 2em;
 }
 
 #hand-display {
-  align-self: center;
+    align-self: center;
+    width: 100%;
+    background-color: darkorange;
+    border-radius: 10%;
+    background-color: #0404043d;
+    border-radius: 13%;
+    padding: 10px;
+    backface-visibility: visible;
 }
 
 #player-hand-list {
-  text-align: center;
-  align-content: center;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    height: 32px;
+    max-height: 120px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    padding: 0;
+    margin: 0;
+    list-style: none;
 }
 
-.hand-item,
-#hand-item {
-  display: flex;
-  flex-direction: row;
-  text-align: center;
+.hand-item {
+    break-inside: avoid;
+    /* prevents splitting items */
+    margin-bottom: 0.25rem;
+}
+
+#player-id {
+    color: black;
+    font-size: 1em;
+}
+
+#player-name {
+    color: black;
+    font-size: 1em;
 }
 
 /* Game screen container uses column flex so header stays at top */
 #game-board-screen {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 #body {
-  flex: 1 1 auto;
-  display: flex;
-  align-items: stretch;
-  gap: 1rem;
-  width: 100%;
-  height: calc(
-    100vh - 60px
-  ); /* Adjust '60px' to the height of your actual header */
-  min-height: 0;
-  box-sizing: border-box;
-  overflow: hidden; /* Prevents the body itself from scrolling */
+    flex: 1 1 auto;
+    display: flex;
+    height: calc(100vh - 60px);
+    min-height: 0;
+    box-sizing: border-box;
 }
 
 #board-wrapper {
-  background-color: gray;
-  flex: 2;
-  margin: 2em;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  box-sizing: border-box;
-  min-height: 0;
-  overflow: hidden;
-  border-radius: 8%;
+    background-color: gray;
+    flex: 2;
+    margin: 2em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    box-sizing: border-box;
+    min-height: 0;
+    overflow: hidden;
+    border-radius: 8%;
+    justify-content: flex-start;
+    max-height: 45em;
 }
+
 #board-container {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 0;
-  width: 100%;
-  position: relative;
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    aspect-ratio: 1920 / 1080;
+    margin: 0 auto;
 }
 
-#board-container img {
-  display: block;
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
+#board-image {
+    width: 100%;
+    height: 100%;
+    display: block;
 }
+
 #board-wrapper {
-  display: flex;
-  flex-direction: column;
-  flex: 2; /* Takes up more space than the notebook */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
 }
+
 /* Bottom controls: smaller fixed-height bar below the board */
 #button-bar {
-  display: flex;
-  flex-direction: row;
-  flex: 0 0 auto;
-  height: 72px;
-  width: 100%;
-  align-self: stretch;
-  padding: 0.5rem;
-  box-sizing: border-box;
-  justify-content: center;
-  gap: 1.5rem;
-}
-area {
-  cursor: pointer;
-}
-#player-profile {
-  background-color: black;
-  border-radius: 100%;
-  min-width: 4rem;
-  min-height: 4rem;
-  margin-right: 3em;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
-#player-capsule {
-  display: flex;
-  flex-direction: row;
-  flex: content;
-  align-content: center;
-  align-items: center;
-  background-color: yellow;
-  margin: 0;
-  padding: 2em;
-  border-radius: 20%;
-  min-height: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    /* KEY */
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
 }
 
+#button-bar button {
+    flex: 1 1 120px;
+    /* grow + shrink with a minimum */
+    max-width: 128px;
+    max-height: 75px;
+}
+
+#player-capsule {
+    display: flex;
+    flex-direction: row;
+    flex: content;
+    align-content: center;
+    align-items: center;
+    background-color: yellow;
+    margin: 0;
+    padding: 2em;
+    border-radius: 20%;
+    min-height: 0.5rem;
+    flex: 1 1 200px;
+    min-width: 180px;
+    max-height: 35px;
+}
+
+area {
+    cursor: pointer;
+}
+
+#player-profile {
+    background-color: black;
+    border-radius: 100%;
+    min-width: 4rem;
+    min-height: 4rem;
+    margin-right: 3em;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+
+
 #player-text {
-  font-size: 12px;
-  margin: 0;
-  padding: 0;
-  color: darkgray;
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+    color: darkgray;
 }
 
 #move {
-  border-radius: 100%;
+    border-radius: 100%;
 }
 
 #end-turn {
-  border-radius: 100%;
+    border-radius: 100%;
 }
 
 #notebook-title {
-  text-align: center;
-  padding-bottom: 0.5rem;
+    text-align: center;
+    padding-bottom: 0.5rem;
 }
 
 #notebook {
-  display: flex;
-  flex-direction: column;
-  flex: 0 0 20%;
-  padding: 1rem;
-  box-sizing: border-box;
-  background-color: grey;
-  margin: 2em;
-  border-radius: 8%;
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 20%;
+    padding: 1rem;
+    box-sizing: border-box;
+    background-color: grey;
+    margin: 2em;
+    border-radius: 8%;
+    min-width: 18rem;
+    overflow: clip;
+    height: 100%;
+    max-height: 45em;
 }
 
 #notebook-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .notebook-item {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.15rem 0;
-  text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0;
+    text-align: center;
 }
 
 input[type="checkbox"] {
-  width: 12px;
-  height: 12px;
-  margin: 0;
+    width: 12px;
+    height: 12px;
+    margin: 0;
 }
 
 .notebook-item label {
-  font-size: 14px;
-  padding-left: 1rem;
+    font-size: 14px;
+    padding-left: 1rem;
 }
 
-input[type="checkbox"]:checked + label {
-  text-decoration: line-through;
-  opacity: 0.7;
+input[type="checkbox"]:checked+label {
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+
+#card-selection {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+
+    align-content: center;
+    justify-content: center;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.5);
+    /* dim background */
+    z-index: 1000;
+
+    display: flex;
+}
+
+#card-selection-container {
+    background: white;
+    padding: 20px 40px;
+    border-radius: 8px;
+    font-size: 20px;
+    text-align: center;
+    height: 12em;
+    width: 80%;
+    align-self: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.game-piece {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+
+    pointer-events: none;
+}
+
+#card-selection-title {
+    color: white;
+    text-align: center;
+    font-size: 4rem;
+}
+
+.card-button {
+    width: 8em;
+    font-size: .75em;
+    font-weight: bold;
 }

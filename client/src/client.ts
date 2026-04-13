@@ -5,7 +5,6 @@ export class Client {
   private retryCount = 0;
   private readonly MAX_RETRIES = 10;
   private readonly BASE_DELAY_MILLISECONDS = 500;
-
   private messageHandlers = new Set<(msg: ServerEvent) => void>();
 
   constructor() {}
