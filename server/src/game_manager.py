@@ -6,10 +6,10 @@ from src.model import (
     PlayerJoinedEvent,
     GameState,
     PlayerState,
-    LobbyPlayer,           # added modification
-    LobbyUpdateEvent,      # added modification
-    CharacterSelectedEvent, # added modification
-    GameStartedEvent,      # added modification
+    LobbyPlayer,
+    LobbyUpdateEvent,
+    CharacterSelectedEvent,
+    GameStartedEvent,
 )
 import logging
 
@@ -28,18 +28,18 @@ class GameManager:
         cur_players = self.game_state.playerStates.copy()
         _logger.info("New player joined: %s", player_id)
 
-        # added modification — assign player_number based on join order (1-indexed)
-        player_number = len(cur_players) + 1  # added modification
 
-        # added modification — first player to join is the host
-        is_host = player_number == 1  # added modification
+        player_number = len(cur_players) + 1
+
+
+        is_host = player_number == 1
 
         self.game_state.playerStates.append(
             PlayerState(
                 playerId=player_id,
                 clickCount=0,
-                player_number=player_number,  # added modification
-                is_host=is_host,              # added modification
+                player_number=player_number,
+                is_host=is_host,
             )
         )
         _logger.info("Current player count: %i", len(cur_players) + 1)
@@ -79,17 +79,17 @@ class GameManager:
             )
         )
 
-        # added modification — broadcast lobby_update to all players so every client
-        # added modification — re-renders the lobby with the new player in the slots
-        response.append(                                                    # added modification
-            (                                                               # added modification
-                None,                                                       # added modification
-                ServerResponse(                                             # added modification
-                    type="lobby_update",                                    # added modification
-                    payload=self._build_lobby_update().model_dump()        # added modification
-                ).model_dump(),                                             # added modification
-            )                                                               # added modification
-        )                                                                   # added modification
+
+
+        response.append(
+            (
+                None,
+                ServerResponse(
+                    type="lobby_update",
+                    payload=self._build_lobby_update().model_dump()
+                ).model_dump(),
+            )
+        )
 
         return response
 
@@ -148,21 +148,21 @@ class GameManager:
                 )
             ]
 
-        # added modification — handle character_select command
-        if validated.type == "character_select":                            # added modification
-            return self._handle_character_select(                           # added modification
-                player_id, validated.payload.get("character")              # added modification
-            )                                                               # added modification
 
-        # added modification — handle ready_up command
-        if validated.type == "ready_up":                                    # added modification
-            return self._handle_ready_up(                                   # added modification
-                player_id, validated.payload.get("ready", False)           # added modification
-            )                                                               # added modification
+        if validated.type == "character_select":
+            return self._handle_character_select(
+                player_id, validated.payload.get("character")
+            )
 
-        # added modification — handle start_game command
-        if validated.type == "start_game":                                  # added modification
-            return self._handle_start_game(player_id)                      # added modification
+
+        if validated.type == "ready_up":
+            return self._handle_ready_up(
+                player_id, validated.payload.get("ready", False)
+            )
+
+
+        if validated.type == "start_game":
+            return self._handle_start_game(player_id)
         
         # graceful error return
         _logger.warning("Unsupported command type received: %s", validated.type)
@@ -176,126 +176,126 @@ class GameManager:
             )
         ]
 
-    # added modification — handle character selection: assign character and broadcast
-    def _handle_character_select(                                           # added modification
-        self, player_id: str, character: str | None                        # added modification
-    ) -> list[tuple[str | None, dict]]:                                    # added modification
-        """Assigns a character to a player if it is not already taken."""  # added modification
-        player = self._get_player_state(player_id)                         # added modification
-        if player is None:                                                  # added modification
-            _logger.error("character_select: player not found: %s", player_id)  # added modification
-            return [(player_id, ServerResponse(                             # added modification
-                type="error",                                               # added modification
-                payload={"message": "player session not found"}            # added modification
-            ).model_dump())]                                                # added modification
 
-        if character is None:                                               # added modification
-            return [(player_id, ServerResponse(                             # added modification
-                type="error",                                               # added modification
-                payload={"message": "no character provided"}               # added modification
-            ).model_dump())]                                                # added modification
+    def _handle_character_select(
+        self, player_id: str, character: str | None
+    ) -> list[tuple[str | None, dict]]:
+        """Assigns a character to a player if it is not already taken."""
+        player = self._get_player_state(player_id)
+        if player is None:
+            _logger.error("character_select: player not found: %s", player_id)
+            return [(player_id, ServerResponse(
+                type="error",
+                payload={"message": "player session not found"}
+            ).model_dump())]
 
-        # added modification — check if character is already taken by another player
-        already_taken = any(                                                # added modification
-            p.character == character and p.playerId != player_id           # added modification
-            for p in self.game_state.playerStates                          # added modification
-        )                                                                   # added modification
-        if already_taken:                                                   # added modification
-            _logger.warning("Character %s already taken", character)       # added modification
-            return [(player_id, ServerResponse(                             # added modification
-                type="error",                                               # added modification
-                payload={"message": f"{character} is already taken"}       # added modification
-            ).model_dump())]                                                # added modification
+        if character is None:
+            return [(player_id, ServerResponse(
+                type="error",
+                payload={"message": "no character provided"}
+            ).model_dump())]
 
-        player.character = character                                        # added modification
-        self._set_player_state(player, player_id)                          # added modification
-        _logger.info("Player %s selected character %s", player_id, character)  # added modification
 
-        response: list[tuple[str | None, dict]] = []                       # added modification
+        already_taken = any(
+            p.character == character and p.playerId != player_id
+            for p in self.game_state.playerStates
+        )
+        if already_taken:
+            _logger.warning("Character %s already taken", character)
+            return [(player_id, ServerResponse(
+                type="error",
+                payload={"message": f"{character} is already taken"}
+            ).model_dump())]
 
-        # added modification — broadcast character_selected event
-        char_event = CharacterSelectedEvent(                                # added modification
-            playerId=player_id, character=character                        # added modification
-        )                                                                   # added modification
-        response.append((None, ServerResponse(                              # added modification
-            type="character_selected",                                      # added modification
-            payload=char_event.model_dump()                                # added modification
-        ).model_dump()))                                                    # added modification
+        player.character = character
+        self._set_player_state(player, player_id)
+        _logger.info("Player %s selected character %s", player_id, character)
 
-        # added modification — broadcast full lobby_update so all clients re-render
-        response.append((None, ServerResponse(                              # added modification
-            type="lobby_update",                                            # added modification
-            payload=self._build_lobby_update().model_dump()               # added modification
-        ).model_dump()))                                                    # added modification
+        response: list[tuple[str | None, dict]] = []
 
-        return response                                                     # added modification
 
-    # added modification — handle ready_up: toggle ready state and broadcast
-    def _handle_ready_up(                                                   # added modification
-        self, player_id: str, ready: bool                                  # added modification
-    ) -> list[tuple[str | None, dict]]:                                    # added modification
-        """Sets a player's ready state and broadcasts lobby_update."""     # added modification
-        player = self._get_player_state(player_id)                         # added modification
-        if player is None:                                                  # added modification
-            _logger.error("ready_up: player not found: %s", player_id)    # added modification
-            return [(player_id, ServerResponse(                             # added modification
-                type="error",                                               # added modification
-                payload={"message": "player session not found"}            # added modification
-            ).model_dump())]                                                # added modification
+        char_event = CharacterSelectedEvent(
+            playerId=player_id, character=character
+        )
+        response.append((None, ServerResponse(
+            type="character_selected",
+            payload=char_event.model_dump()
+        ).model_dump()))
 
-        player.is_ready = ready                                             # added modification
-        self._set_player_state(player, player_id)                          # added modification
-        _logger.info("Player %s ready state: %s", player_id, ready)       # added modification
 
-        return [(None, ServerResponse(                                      # added modification
-            type="lobby_update",                                            # added modification
-            payload=self._build_lobby_update().model_dump()               # added modification
-        ).model_dump())]                                                    # added modification
+        response.append((None, ServerResponse(
+            type="lobby_update",
+            payload=self._build_lobby_update().model_dump()
+        ).model_dump()))
 
-    # added modification — handle start_game: host only, transitions phase and broadcasts
-    def _handle_start_game(                                                 # added modification
-        self, player_id: str                                               # added modification
-    ) -> list[tuple[str | None, dict]]:                                    # added modification
-        """Starts the game if the requesting player is the host."""        # added modification
-        player = self._get_player_state(player_id)                         # added modification
-        if player is None or not player.is_host:                           # added modification
-            _logger.warning("start_game rejected: %s is not host", player_id)  # added modification
-            return [(player_id, ServerResponse(                             # added modification
-                type="error",                                               # added modification
-                payload={"message": "only the host can start the game"}   # added modification
-            ).model_dump())]                                                # added modification
+        return response
 
-        # added modification — set turn order and transition phase to active
-        self.game_state.turn_order = [                                      # added modification
-            p.playerId for p in self.game_state.playerStates               # added modification
-        ]                                                                   # added modification
-        self.game_state.current_turn_index = 0                             # added modification
-        self.game_state.phase = "active"                                   # added modification
-        _logger.info("Game started by host %s", player_id)                 # added modification
 
-        starting_player = self.game_state.active_player_id()               # added modification
+    def _handle_ready_up(
+        self, player_id: str, ready: bool
+    ) -> list[tuple[str | None, dict]]:
+        """Sets a player's ready state and broadcasts lobby_update."""
+        player = self._get_player_state(player_id)
+        if player is None:
+            _logger.error("ready_up: player not found: %s", player_id)
+            return [(player_id, ServerResponse(
+                type="error",
+                payload={"message": "player session not found"}
+            ).model_dump())]
 
-        # added modification — broadcast game_started to all clients
-        game_started = GameStartedEvent(startingPlayerId=starting_player)  # added modification
-        return [(None, ServerResponse(                                      # added modification
-            type="game_started",                                            # added modification
-            payload=game_started.model_dump()                              # added modification
-        ).model_dump())]                                                    # added modification
+        player.is_ready = ready
+        self._set_player_state(player, player_id)
+        _logger.info("Player %s ready state: %s", player_id, ready)
 
-    # added modification — build a LobbyUpdateEvent from current game state
-    def _build_lobby_update(self) -> LobbyUpdateEvent:                     # added modification
-        """Constructs a LobbyUpdateEvent from the current playerStates.""" # added modification
-        players = [                                                         # added modification
-            LobbyPlayer(                                                    # added modification
-                playerId=p.playerId,                                        # added modification
-                playerNumber=p.player_number,                              # added modification
-                character=p.character if p.character else None,            # added modification
-                isReady=p.is_ready,                                        # added modification
-                isHost=p.is_host,                                          # added modification
-            )                                                               # added modification
-            for p in self.game_state.playerStates                          # added modification
-        ]                                                                   # added modification
-        return LobbyUpdateEvent(players=players)                            # added modification
+        return [(None, ServerResponse(
+            type="lobby_update",
+            payload=self._build_lobby_update().model_dump()
+        ).model_dump())]
+
+
+    def _handle_start_game(
+        self, player_id: str
+    ) -> list[tuple[str | None, dict]]:
+        """Starts the game if the requesting player is the host."""
+        player = self._get_player_state(player_id)
+        if player is None or not player.is_host:
+            _logger.warning("start_game rejected: %s is not host", player_id)
+            return [(player_id, ServerResponse(
+                type="error",
+                payload={"message": "only the host can start the game"}
+            ).model_dump())]
+
+
+        self.game_state.turn_order = [
+            p.playerId for p in self.game_state.playerStates
+        ]
+        self.game_state.current_turn_index = 0
+        self.game_state.phase = "active"
+        _logger.info("Game started by host %s", player_id)
+
+        starting_player = self.game_state.active_player_id()
+
+
+        game_started = GameStartedEvent(startingPlayerId=starting_player)
+        return [(None, ServerResponse(
+            type="game_started",
+            payload=game_started.model_dump()
+        ).model_dump())]
+
+
+    def _build_lobby_update(self) -> LobbyUpdateEvent:
+        """Constructs a LobbyUpdateEvent from the current playerStates."""
+        players = [
+            LobbyPlayer(
+                playerId=p.playerId,
+                playerNumber=p.player_number,
+                character=p.character if p.character else None,
+                isReady=p.is_ready,
+                isHost=p.is_host,
+            )
+            for p in self.game_state.playerStates
+        ]
+        return LobbyUpdateEvent(players=players)
 
     def _get_player_state(self, player_id: str) -> PlayerState | None:
         for p in self.game_state.playerStates:
