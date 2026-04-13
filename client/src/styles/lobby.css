@@ -13,6 +13,7 @@
 }
 
 #start {
+  display: block;
   background-color: green;
   color: black;
   width: 100%;

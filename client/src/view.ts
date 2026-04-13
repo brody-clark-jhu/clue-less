@@ -346,6 +346,7 @@ export class View {
 
   public SetStartButtonVisibility(isVisible: boolean): void {
     const btn = document.getElementById("start")!;
+    console.log(btn);
     if (isVisible) {
       btn.classList.remove("hidden");
     }
