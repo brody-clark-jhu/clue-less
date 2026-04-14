@@ -425,8 +425,9 @@ export class View {
   public ShowLandingScreen(): void {
     this.ShowScreen("landing-screen");
   }
-  public ShowLobbyScreen(): void {
+  public ShowLobbyScreen(showStartButton: boolean): void {
     this.ShowScreen("lobby-screen");
+    this.SetStartButtonVisibility(showStartButton);
   }
 
   private updateAllPiecePositions() {

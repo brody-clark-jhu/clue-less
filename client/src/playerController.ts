@@ -99,7 +99,6 @@ export class PlayerController {
   private registerUIHandlers() {
     onJoinLobbyClick(() => {
       this.client.connectWebSocket();
-      this.setPhase(PLAYER_STATES.Lobby);
     });
 
     onCharacterSelection((character: Character) => {
@@ -263,14 +262,7 @@ export class PlayerController {
     console.log(`Active player id: ${activeId}`);
 
     if (this.gameState!.phase == "lobby") {
-      if (!this.playerState!.is_host) {
-        console.log("Not host");
-        this.view.SetStartButtonVisibility(false);
-      } else {
-        this.view.SetStartButtonVisibility(true);
-        console.log("Is Host");
-
-      }
+        this.setPhase(PLAYER_STATES.Lobby);
     }
     else if (this.gameState.phase == "active") {
       // update board
@@ -321,7 +313,7 @@ export class PlayerController {
         this.view.ShowLandingScreen();
         break;
       case PLAYER_STATES.Lobby:
-        this.view.ShowLobbyScreen();
+        this.view.ShowLobbyScreen(this.playerState!.is_host);
         break;
       case PLAYER_STATES.Active:
         this.view.EnableActions(true);
