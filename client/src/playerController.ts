@@ -120,7 +120,7 @@ export class PlayerController {
 
     onMoveButtonClick(() => {
       if (this.playerPhase !== PLAYER_STATES.Active) return;
-      this.view.SetPopupEventMessage("Select a location to move", 2);
+      this.view.SetPopupEventMessage("Select a location to move to", 2);
       this.setPhase(PLAYER_STATES.Selecting);
       this.selectionContext = "suggestion";
     });
@@ -337,7 +337,7 @@ export class PlayerController {
       case PLAYER_STATES.Disprove:
         console.log("Disprove state");
         this.selectionContext = "disprove";
-        this.view.EnableCardSelection(this.hand, "Select a card to disprove", 3);
+        this.view.EnableCardSelection(this.hand, "Select a card to disprove");
         break;
     }
   }
