@@ -4,6 +4,10 @@ Definition: This model creates all the classes that will be utlizied thoughout t
 """
 
 import random
+import logging
+from src.utils import write_message_to_file
+
+_logger = logging.getLogger(__name__)
 
 class BoardState:
     """Board topology, occupancy tracking, and move validation."""
@@ -141,6 +145,7 @@ class CardDeck:
             "weapon": random.choice(self.WEAPONS),
             "room": random.choice(self.ROOMS),
         }
+        write_message_to_file(f"Solution: { self.solution}")
         self.sealed = True
 
     def deal(self, players) -> None:
