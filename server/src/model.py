@@ -12,6 +12,8 @@ class PlayerState(BaseModel):
     moved_this_turn: bool = False
     must_suggest: bool = False
     dragged_to_room: bool = False
+    is_ready: bool = False
+    player_number: int = 0
 
     def _in_room(self) -> bool:
         return self.location != "" and "-" not in self.location
@@ -88,3 +90,16 @@ class WelcomeResponse(BaseModel):
 class PlayerJoinedEvent(BaseModel):
     """Event to notify players of a newly connected player."""
     playerId: str
+
+
+class LobbyPlayer(BaseModel):
+    """Represents one player's lobby state sent to all clients."""
+    playerId: str
+    playerNumber: int
+    character: str | None = None
+    isReady: bool = False
+    isHost: bool = False
+
+class LobbyUpdateEvent(BaseModel):
+    """Broadcast to all clients whenever lobby state changes."""
+    players: list[LobbyPlayer]

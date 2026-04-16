@@ -7,6 +7,8 @@ from src.model import (
     PlayerJoinedEvent,
     GameState,
     PlayerState,
+    LobbyPlayer,
+    LobbyUpdateEvent,
 )
 from src.game_model import BoardState, CardDeck, SuggestionManager
 
@@ -33,9 +35,15 @@ class GameManager:
     def add_player(self, player_id: str) -> Responses:
         """Register a new player and notify all clients."""
         is_first = len(self.game_state.playerStates) == 0
-        player = PlayerState(playerId=player_id, is_host=is_first)
-        player.displayName = f"Player {len(self.game_state.playerStates) + 1}"
+        player_number = len(self.game_state.playerStates) + 1
+        player = PlayerState(
+            playerId=player_id,
+            is_host=is_first,
+            player_number=player_number,
+        )
+        player.displayName = f"Player {player_number}"
         self.game_state.playerStates.append(player)
+        _logger.info("Player %s joined as player_number=%d is_host=%s", player_id, player_number, is_first)
         responses: Responses = []
         responses.append((
             player_id,
@@ -56,6 +64,13 @@ class GameManager:
         responses.append((
             player_id,
             self._game_update(),
+        ))
+        responses.append((
+            None,
+            ServerResponse(
+                type="lobby_update",
+                payload=self._build_lobby_update().model_dump(),
+            ).model_dump(),
         ))
         return responses
 
@@ -86,6 +101,7 @@ class GameManager:
             "disprove": self._handle_disprove,
             "cannot_disprove": self._handle_cannot_disprove,
             "select_character": self._handle_character_select,
+            "ready_up": self._handle_ready_up,
         }
 
         handler = handlers.get(validated.type)
@@ -107,7 +123,29 @@ class GameManager:
         player.character = character
         responses: Responses = []
         responses.append((None, self._game_update()))
+        responses.append((
+            None,
+            ServerResponse(
+                type="lobby_update",
+                payload=self._build_lobby_update().model_dump(),
+            ).model_dump(),
+        ))
         return responses
+
+    def _handle_ready_up(self, player_id: str, payload: dict) -> Responses:
+        """Sets a player's ready state and broadcasts lobby_update to all clients."""
+        player = self._get_player(player_id)
+        if not player:
+            return [self._error(player_id, "player not found")]
+        player.is_ready = payload.get("ready", False)
+        _logger.info("Player %s ready state: %s", player_id, player.is_ready)
+        return [(
+            None,
+            ServerResponse(
+                type="lobby_update",
+                payload=self._build_lobby_update().model_dump(),
+            ).model_dump(),
+        )]
 
                 
     def _handle_start_game(self, player_id: str, payload: dict) -> Responses:
@@ -390,3 +428,18 @@ class GameManager:
                 payload={"message": message},
             ).model_dump(),
         )
+
+    def _build_lobby_update(self) -> LobbyUpdateEvent:
+        """Constructs a LobbyUpdateEvent from the current playerStates."""
+        players = [
+            LobbyPlayer(
+                playerId=p.playerId,
+                playerNumber=p.player_number,
+                character=p.character if p.character else None,
+                isReady=p.is_ready,
+                isHost=p.is_host,
+            )
+            for p in self.game_state.playerStates
+        ]
+        _logger.info("Building lobby update: %s", [p.model_dump() for p in players])
+        return LobbyUpdateEvent(players=players)

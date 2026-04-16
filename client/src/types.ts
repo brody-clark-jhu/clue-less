@@ -149,6 +149,22 @@ export interface CharacterSelectPayload {
   character: Character;
 }
 
+export interface LobbyPlayer {
+  playerId: string;
+  playerNumber: number;
+  character: Character | null;
+  isReady: boolean;
+  isHost: boolean;
+}
+
+export interface LobbyUpdateEvent {
+  players: LobbyPlayer[];
+}
+
+export interface ReadyUpPayload {
+  ready: boolean;
+}
+
 export type ClientCommand =
   | { type: "move"; payload: MovePayload }
   | { type: "suggest"; payload: SuggestionPayload }
@@ -156,7 +172,8 @@ export type ClientCommand =
   | { type: "cannot_disprove"; payload: {} }
   | { type: "select_character"; payload: CharacterSelectPayload }
   | { type: "start_game"; payload: {} }
-  | { type: "disprove"; payload: DisprovePayload };
+  | { type: "disprove"; payload: DisprovePayload }
+  | { type: "ready_up"; payload: ReadyUpPayload };
 
 export type ServerEvent =
   | { type: "player_joined"; payload: PlayerJoinedEvent }
@@ -170,6 +187,7 @@ export type ServerEvent =
   | { type: "suggestion_unchallenged"; payload: SuggestionUnchallengedEvent }
   | { type: "deal_cards"; payload: DealCardsEvent }
   | { type: "game_over"; payload: GameOverEvent}
-  | { type: "error"; payload: { message: string } };
+  | { type: "error"; payload: { message: string } }
+  | { type: "lobby_update"; payload: LobbyUpdateEvent };
 
 export type Message = ClientCommand | ServerEvent;

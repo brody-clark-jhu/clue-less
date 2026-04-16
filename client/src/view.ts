@@ -9,6 +9,7 @@ import {
   type Character,
   Characters,
   type Card,
+  type LobbyPlayer,
 } from "./types";
 import imageMapResize from "image-map-resizer";
 
@@ -39,6 +40,9 @@ let cardSelectionCallback: CardSelectionCallback | undefined;
 
 type CharacterSelectionCallback = (character: Character) => void;
 let characterSelectionCallback: CharacterSelectionCallback | undefined;
+
+type ReadyUpCallback = () => void;
+let readyUpCallback: ReadyUpCallback | undefined;
 
 export function onBoardClick(cb: BoardClickCallback) {
   boardClickCallback = cb;
@@ -71,6 +75,10 @@ export function onCharacterSelection(cb: CharacterSelectionCallback) {
 
 export function onStartButtonClicked(cb: StartButtonClickedCallback) {
   startButtonClickedCallback = cb;
+}
+
+export function onReadyUpClick(cb: ReadyUpCallback) {
+  readyUpCallback = cb;
 }
 
 const SELECTION_ID_TO_CHARACTER: Record<string, Character> = {
@@ -281,6 +289,13 @@ export class View {
         startButtonClickedCallback();
       }
     });
+
+    const readyBtn = document.getElementById("btn-ready-up");
+    if (readyBtn) {
+      readyBtn.addEventListener("click", () => {
+        if (readyUpCallback) readyUpCallback();
+      });
+    }
   }
 
 
@@ -551,6 +566,74 @@ export class View {
       this.playerElements.get(playerId);
     if (player) {
       player.textContent = `Player ${playerId}: ${text}`;
+    }
+  }
+
+  public UpdateLobbyPlayers(players: LobbyPlayer[], myPlayerId: string): void {
+    const countEl = document.getElementById("lobby-player-count");
+    if (countEl) countEl.textContent = `(${players.length}/6)`;
+
+    for (let i = 1; i <= 6; i++) {
+      const slot = document.getElementById(`slot-${i}`);
+      if (!slot) continue;
+
+      const player = players.find((p) => p.playerNumber === i);
+      const labelEl = slot.querySelector(".slot-label") as HTMLElement;
+      const charEl = slot.querySelector(".slot-character") as HTMLElement;
+      const badgeEl = slot.querySelector(".slot-badge") as HTMLElement;
+
+      slot.classList.remove("occupied", "ready", "is-me", "is-host");
+
+      if (player) {
+        slot.classList.add("occupied");
+        labelEl.textContent = `Player ${player.playerNumber}`;
+        charEl.textContent = player.character ?? "No character selected";
+        if (player.playerId === myPlayerId) slot.classList.add("is-me");
+        if (player.isHost) {
+          slot.classList.add("is-host");
+          badgeEl.textContent = "HOST";
+        } else {
+          badgeEl.textContent = "";
+        }
+        if (player.isReady) {
+          slot.classList.add("ready");
+          if (!player.isHost) badgeEl.textContent = "READY";
+        }
+      } else {
+        labelEl.textContent = "Waiting...";
+        charEl.textContent = "";
+        badgeEl.textContent = "";
+      }
+    }
+
+    const myPlayer = players.find((p) => p.playerId === myPlayerId);
+    const myCharacter = myPlayer?.character ?? null;
+
+    document.querySelectorAll<HTMLElement>(".character-select").forEach((btn) => {
+      const char = btn.textContent?.trim() ?? "";
+      const takenBy = players.find((p) => p.character === char);
+      btn.classList.remove("character-taken", "character-mine");
+      btn.removeAttribute("disabled");
+      if (takenBy) {
+        if (takenBy.playerId === myPlayerId) {
+          btn.classList.add("character-mine");
+        } else {
+          btn.classList.add("character-taken");
+          btn.setAttribute("disabled", "true");
+        }
+      }
+    });
+
+    const readyBtn = document.getElementById("btn-ready-up") as HTMLButtonElement | null;
+    if (readyBtn) {
+      readyBtn.disabled = myCharacter === null;
+      if (myPlayer?.isReady) {
+        readyBtn.textContent = "Unready";
+        readyBtn.classList.add("is-ready");
+      } else {
+        readyBtn.textContent = "Ready Up";
+        readyBtn.classList.remove("is-ready");
+      }
     }
   }
 }
