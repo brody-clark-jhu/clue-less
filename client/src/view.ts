@@ -82,7 +82,7 @@ export function onReadyUpClick(cb: ReadyUpCallback) {
 }
 
 const SELECTION_ID_TO_CHARACTER: Record<string, Character> = {
-  "colonel-mustard": "Col. Mustard",
+  "colonel-mustard": "Colonel Mustard",
   "ms-scarlet": "Miss Scarlet",
   "prof-plum": "Professor Plum",
   "mr-green": "Mr. Green",
@@ -90,7 +90,7 @@ const SELECTION_ID_TO_CHARACTER: Record<string, Character> = {
   "mrs-peacock": "Mrs. Peacock",
 };
 const CHARACTER_TO_PORTRAIT: Record<Character, string> = {
-  "Col. Mustard": "portrait-col-mustard",
+  "Colonel Mustard": "portrait-col-mustard",
   "Miss Scarlet": "portrait-miss-scarlet",
   "Mr. Green": "portrait-mr-green",
   "Mrs. Peacock": "portrait-mrs-peacock",
@@ -282,13 +282,14 @@ export class View {
       }
     }
 
-
-    const startBtn = document.getElementById("start")!;
-    startBtn.addEventListener("click", () => {
-      if (startButtonClickedCallback) {
-        startButtonClickedCallback();
-      }
-    });
+    const startBtn = document.getElementById("btn-startgame");
+    if (startBtn) {
+      startBtn.addEventListener("click", () => {
+        if (startButtonClickedCallback) {
+          startButtonClickedCallback();
+        }
+      });
+    }
 
     const readyBtn = document.getElementById("btn-ready-up");
     if (readyBtn) {
@@ -360,7 +361,8 @@ export class View {
   }
 
   public SetStartButtonVisibility(isVisible: boolean): void {
-    const btn = document.getElementById("start")!;
+    const btn = document.getElementById("start");
+    if (!btn) return;
     console.log(btn);
     if (isVisible) {
       btn.classList.remove("hidden");
@@ -610,7 +612,8 @@ export class View {
     const myCharacter = myPlayer?.character ?? null;
 
     document.querySelectorAll<HTMLElement>(".character-select").forEach((btn) => {
-      const char = btn.textContent?.trim() ?? "";
+      const char = btn.dataset.character ?? "";
+      if (!char) return;
       const takenBy = players.find((p) => p.character === char);
       btn.classList.remove("character-taken", "character-mine");
       btn.removeAttribute("disabled");
@@ -634,6 +637,13 @@ export class View {
         readyBtn.textContent = "Ready Up";
         readyBtn.classList.remove("is-ready");
       }
+    }
+
+    //show Start Game button ONLY for the host
+    const startBtn = document.getElementById("btn-startgame") as HTMLButtonElement | null;
+    if (startBtn) {
+      const isHost = myPlayer?.isHost ?? false;
+      startBtn.style.display = isHost ? "block" : "none";
     }
   }
 }

@@ -24,11 +24,6 @@
 </head>
 
 <body>
-  <div id="event-popup" class="popup hidden">
-    <div class="popup-content">
-      <p id="event-msg">Event</p>
-    </div>
-  </div>
 
   <!-- Home Screen -->
   <div id="landing-screen" class="screen active">
@@ -42,20 +37,21 @@
         <button type="button" id="btn-join-lobby" class="btn-landing">Join Lobby</button>
       </div>
     </div>
+
   </div>
 
   <!-- Lobby Screen -->
   <div id="lobby-screen" class="screen">
-    <div class="lobby-layout">
-      <h1 class="lobby-title">LOBBY</h1>
+    <div class="lobby-layout"> 
+        <h1 class="lobby-title">LOBBY</h1>
 
-      <!-- left pane: character selection -->
-      <div class="lobby-left">
+      <!-- left pane: character selection cards -->
+      <div class="lobby-left"> 
         <h2 class="lobby-pane-title">Choose Your Character</h2>
-        <div id="character-container" class="character-grid">
+        <div id="character-container" class="character-grid"> 
 
           <!-- Miss Scarlet -->
-          <button id="ms-scarlet" type="button" class="character-card character-select">
+          <button id="ms-scarlet" type="button" class="character-card character-select" data-character="Miss Scarlet">
             <div class="character-card-top">
               <span class="character-name">Miss Scarlet</span>
               <div class="character-avatar avatar-scarlet">
@@ -63,7 +59,7 @@
               </div>
             </div>
             <div class="character-card-image">
-              <img src="./public/images/character_scarlet.png" alt="Miss Scarlet" />
+              <img src="./public/images/character_scarlet.png" alt="Miss Scarlet">
             </div>
             <div class="character-card-bottom">
               <span class="character-status">Available</span>
@@ -72,7 +68,7 @@
           </button>
 
           <!-- Colonel Mustard -->
-          <button id="colonel-mustard" type="button" class="character-card character-select">
+          <button id="colonel-mustard" type="button" class="character-card character-select" data-character="Colonel Mustard">
             <div class="character-card-top">
               <span class="character-name">Col. Mustard</span>
               <div class="character-avatar avatar-mustard">
@@ -80,7 +76,7 @@
               </div>
             </div>
             <div class="character-card-image">
-              <img src="./public/images/character_mustard.png" alt="Colonel Mustard" />
+              <img src="./public/images/character_mustard.png" alt="Colonel Mustard">
             </div>
             <div class="character-card-bottom">
               <span class="character-status">Available</span>
@@ -89,7 +85,7 @@
           </button>
 
           <!-- Mrs. White -->
-          <button id="mrs-white" type="button" class="character-card character-select">
+          <button id="mrs-white" type="button" class="character-card character-select" data-character="Mrs. White">
             <div class="character-card-top">
               <span class="character-name">Mrs. White</span>
               <div class="character-avatar avatar-white">
@@ -97,7 +93,7 @@
               </div>
             </div>
             <div class="character-card-image">
-              <img src="./public/images/character_white.png" alt="Mrs. White" />
+              <img src="./public/images/character_white.png" alt="Mrs. White">
             </div>
             <div class="character-card-bottom">
               <span class="character-status">Available</span>
@@ -106,7 +102,7 @@
           </button>
 
           <!-- Mr. Green -->
-          <button id="mr-green" type="button" class="character-card character-select">
+          <button id="mr-green" type="button" class="character-card character-select" data-character="Mr. Green">
             <div class="character-card-top">
               <span class="character-name">Mr. Green</span>
               <div class="character-avatar avatar-green">
@@ -114,7 +110,7 @@
               </div>
             </div>
             <div class="character-card-image">
-              <img src="./public/images/character_green.png" alt="Mr. Green" />
+              <img src="./public/images/character_green.png" alt="Mr. Green">
             </div>
             <div class="character-card-bottom">
               <span class="character-status">Available</span>
@@ -123,7 +119,7 @@
           </button>
 
           <!-- Mrs. Peacock -->
-          <button id="mrs-peacock" type="button" class="character-card character-select">
+          <button id="mrs-peacock" type="button" class="character-card character-select" data-character="Mrs. Peacock">
             <div class="character-card-top">
               <span class="character-name">Mrs. Peacock</span>
               <div class="character-avatar avatar-peacock">
@@ -131,7 +127,7 @@
               </div>
             </div>
             <div class="character-card-image">
-              <img src="./public/images/character_peacock.png" alt="Mrs. Peacock" />
+              <img src="./public/images/character_peacock.png" alt="Mrs. Peacock">
             </div>
             <div class="character-card-bottom">
               <span class="character-status">Available</span>
@@ -140,7 +136,7 @@
           </button>
 
           <!-- Professor Plum -->
-          <button id="prof-plum" type="button" class="character-card character-select">
+          <button id="prof-plum" type="button" class="character-card character-select" data-character="Professor Plum">
             <div class="character-card-top">
               <span class="character-name">Professor Plum</span>
               <div class="character-avatar avatar-plum">
@@ -148,7 +144,7 @@
               </div>
             </div>
             <div class="character-card-image">
-              <img src="./public/images/character_plum.png" alt="Professor Plum" />
+              <img src="./public/images/character_plum.png" alt="Professor Plum">
             </div>
             <div class="character-card-bottom">
               <span class="character-status">Available</span>
@@ -156,83 +152,81 @@
             </div>
           </button>
 
-        </div>
-      </div>
+        </div> 
+      </div> 
 
       <!-- right pane: player slots and action buttons -->
-      <div class="lobby-right">
-        <h2 class="lobby-pane-title">Players <span id="lobby-player-count">(0/6)</span></h2>
+      <div class="lobby-right"> 
+        <h2 class="lobby-pane-title">Players <span id="lobby-player-count">(0/6)</span></h2> 
 
-        <div id="player-board" class="player-slots">
-          <div class="player-slot" id="slot-1">
-            <div class="slot-number">1</div>
-            <div class="slot-info">
-              <span class="slot-label">Waiting...</span>
-              <span class="slot-character"></span>
-            </div>
-            <div class="slot-badge"></div>
-          </div>
-          <div class="player-slot" id="slot-2">
-            <div class="slot-number">2</div>
-            <div class="slot-info">
-              <span class="slot-label">Waiting...</span>
-              <span class="slot-character"></span>
-            </div>
-            <div class="slot-badge"></div>
-          </div>
-          <div class="player-slot" id="slot-3">
-            <div class="slot-number">3</div>
-            <div class="slot-info">
-              <span class="slot-label">Waiting...</span>
-              <span class="slot-character"></span>
-            </div>
-            <div class="slot-badge"></div>
-          </div>
+        <!-- six player slots -->
+        <div class="player-slots"> 
+          <div class="player-slot" id="slot-1"> 
+            <div class="slot-number">1</div> 
+            <div class="slot-info"> 
+              <span class="slot-label">Waiting...</span> 
+              <span class="slot-character"></span> 
+            </div> 
+            <div class="slot-badge"></div> 
+          </div> 
+          <div class="player-slot" id="slot-2"> 
+            <div class="slot-number">2</div> 
+            <div class="slot-info"> 
+              <span class="slot-label">Waiting...</span> 
+              <span class="slot-character"></span> 
+            </div> 
+            <div class="slot-badge"></div> 
+          </div> 
+          <div class="player-slot" id="slot-3"> 
+            <div class="slot-number">3</div> 
+            <div class="slot-info"> 
+              <span class="slot-label">Waiting...</span> 
+              <span class="slot-character"></span> 
+            </div> 
+            <div class="slot-badge"></div> 
+          </div> 
           <div class="player-slot" id="slot-4">
-            <div class="slot-number">4</div>
-            <div class="slot-info">
+            <div class="slot-number">4</div> 
+            <div class="slot-info"> 
               <span class="slot-label">Waiting...</span>
+              <span class="slot-character"></span> 
+            </div> 
+            <div class="slot-badge"></div> 
+          </div> 
+          <div class="player-slot" id="slot-5"> 
+            <div class="slot-number">5</div> 
+            <div class="slot-info"> 
+              <span class="slot-label">Waiting...</span> 
+              <span class="slot-character"></span> 
+            </div> 
+            <div class="slot-badge"></div> 
+          </div> 
+          <div class="player-slot" id="slot-6"> 
+            <div class="slot-number">6</div> 
+            <div class="slot-info"> 
+              <span class="slot-label">Waiting...</span> 
               <span class="slot-character"></span>
-            </div>
-            <div class="slot-badge"></div>
+            </div> 
+            <div class="slot-badge"></div> 
           </div>
-          <div class="player-slot" id="slot-5">
-            <div class="slot-number">5</div>
-            <div class="slot-info">
-              <span class="slot-label">Waiting...</span>
-              <span class="slot-character"></span>
-            </div>
-            <div class="slot-badge"></div>
-          </div>
-          <div class="player-slot" id="slot-6">
-            <div class="slot-number">6</div>
-            <div class="slot-info">
-              <span class="slot-label">Waiting...</span>
-              <span class="slot-character"></span>
-            </div>
-            <div class="slot-badge"></div>
-          </div>
-        </div>
+        </div> 
 
-        <div class="lobby-actions">
+        <!-- Ready Up and Start Game buttons -->
+        <div class="lobby-actions"> 
           <button type="button" id="btn-ready-up" class="btn-ready" disabled>
-            Ready Up
-          </button>
-          <button id="start" type="button" class="btn-start hidden"> Play </button>
-        </div>
+            Ready Up 
+          </button> 
+          <button type="button" id="btn-startgame" class="btn-start" style="display:none;"> 
+            Start Game 
+          </button> 
+        </div> 
 
-      </div>
-    </div>
+      </div> 
+    </div> 
   </div>
 
   <!-- Game board screen -->
   <div id="game-board-screen" class="screen">
-    <div id="card-selection" class="hidden">
-      <h3 id="card-selection-title">Title</h3>
-       <div id="card-selection-container">
-
-       </div>
-    </div>
     <div id="header-bar">
       <h1 id="title"> Clue-Less </h1>
       <div id="hand-display">
@@ -244,10 +238,9 @@
     </div>
     <div id="body">
       <div id="board-wrapper">
-        <h2 id="player-turn-text">Player Turn: </h2>
         <div id="board-container">
           <!-- Image Map Generated by http://www.image-map.net/ -->
-          <img src="./public/images/game_board.png" id="board-image" usemap="#image-map">
+          <img src="./images/game_board.png" usemap="#image-map">
           <map name="image-map">
             <area target="_self" alt="library" title="library" href="" coords="41,414,402,670" shape="rect">
             <area target="_self" alt="study" title="study" href="" coords="48,58,404,303" shape="rect">
@@ -282,12 +275,7 @@
             <area target="_self" alt="lounge-dining-room" title="lounge-dining-room" href="" coords="1614,297,1790,408"
               shape="rect">
           </map>
-          <img src="./public/images/portrait_col_mustard.png" alt="col mustard" id="portrait-col-mustard" class="game-piece hidden">
-          <img src="./public/images/portrait_ms_scarlet.png" alt="miss scarlet" id="portrait-miss-scarlet" class="game-piece hidden">
-          <img src="./public/images/portrait_mr_green.png" alt="mr green" id="portrait-mr-green" class="game-piece hidden">
-          <img src="./public/images/portrait_mrs_peacock.png" alt="mrs peacock" id="portrait-mrs-peacock" class="game-piece hidden">
-          <img src="./public/images/portrait_mrs_white.png" alt="mrs white" id="portrait-mrs-white" class="game-piece hidden">
-          <img src="./public/images/portrait_prof_plum.png" alt="prof plum" id="portrait-prof-plum" class="game-piece hidden">
+
         </div>
         <div id="button-bar">
           <div id="player-capsule">
@@ -300,7 +288,7 @@
           <button id="move" type="button">Move</button>
           <button id="suggestion" type="button">Make Suggestions</button>
           <button id="accusation" type="button">Accusation</button>
-          <!-- <button id="end-turn" type="button">End Turn</button> -->
+          <button id="end-turn" type="button">End Turn</button>
         </div>
       </div>
       <div id="notebook">

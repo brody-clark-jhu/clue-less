@@ -1,5 +1,5 @@
 export const Characters = {
-  ColonelMustard: "Col. Mustard",
+  ColonelMustard: "Colonel Mustard",
   MissScarlet: "Miss Scarlet",
   ProfessorPlum: "Professor Plum",
   MrGreen: "Mr. Green",
