@@ -341,7 +341,8 @@ export class View {
     const myCharacter = myPlayer?.character ?? null;                             
 
     document.querySelectorAll<HTMLElement>(".character-card").forEach((card) => { 
-      const char = card.dataset.character as Character;                      
+      const char = card.dataset.character as Character | undefined;
+      if (!char) return;
       const takenBy = players.find((p) => p.character === char);               
       const statusEl = card.querySelector(".character-status") as HTMLElement;   
 
