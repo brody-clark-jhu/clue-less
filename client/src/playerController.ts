@@ -24,6 +24,7 @@ import {
   onCardSelection,
   onCharacterSelection,
   onStartButtonClicked,
+  onReadyUpClick,
 } from "./view";
 import type { NotebookItem } from "./models/game.model";
 import type {
@@ -32,6 +33,7 @@ import type {
   AccusationPayload,
   CharacterSelectPayload,
   DisproveRequestEvent,
+  LobbyUpdateEvent,
 } from "./types";
 import { loadNotebookData } from "./dataLoader";
 
@@ -70,6 +72,8 @@ export class PlayerController {
   private eventQueue: ServerEvent[] = [];
   private isProcessing = false;
 
+  private isReady: boolean = false;
+
   constructor(client: Client, view: View) {
     this.client = client;
     this.view = view;
@@ -98,6 +102,7 @@ export class PlayerController {
 
   private registerUIHandlers() {
     onJoinLobbyClick(() => {
+      this.view.ShowLobbyScreen(false);
       this.client.connectWebSocket();
     });
 
@@ -115,6 +120,15 @@ export class PlayerController {
     onStartButtonClicked(() => {
       console.log("Starting Game.");
       this.client.sendMessage({ type: "start_game", payload: {} });
+    });
+
+    onReadyUpClick(() => {
+      this.isReady = !this.isReady;
+      console.log(`Ready state toggled: ${this.isReady}`);
+      this.client.sendMessage({
+        type: "ready_up",
+        payload: { ready: this.isReady },
+      });
     });
 
     onMoveButtonClick(() => {
@@ -243,6 +257,17 @@ export class PlayerController {
       case "error":
         await this.view.SetPopupEventMessage(event.payload.message, 3);
         break;
+
+      case "lobby_update": {
+        this.view.UpdateLobbyPlayers(event.payload.players, this.playerId);
+        const me = event.payload.players.find(
+          (p) => p.playerId === this.playerId
+        );
+        if (me) {
+          this.view.SetStartButtonVisibility(me.isHost);
+        }
+        break;
+      }
     }
   }
 
