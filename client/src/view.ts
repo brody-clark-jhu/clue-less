@@ -4,10 +4,7 @@ import {
   Rooms,
   Corridors,
   SecretPassages,
-  type Room,
-  type Corridor,
   type Character,
-  Characters,
   type Card,
   type LobbyPlayer,
 } from "./types";
@@ -100,6 +97,14 @@ const CHARACTER_TO_PORTRAIT: Record<Character, string> = {
   "Professor Plum": "portrait-prof-plum",
 };
 
+/** Server / older clients may still send display abbreviations. */
+function portraitIdForServerCharacter(character: string): string | undefined {
+  if (character === "Col. Mustard") {
+    return CHARACTER_TO_PORTRAIT["Colonel Mustard"];
+  }
+  return CHARACTER_TO_PORTRAIT[character as Character];
+}
+
 const ID_TO_LOCATION: Record<string, Location> = {
   library: Rooms.Library,
   study: Rooms.Study,
@@ -158,7 +163,7 @@ const LOCATION_TO_ID: Record<Location, string> = {
   [SecretPassages.ConservatoryLounge]: "Conservatory-Lounge",
 };
 
-export const LOCATION_POSITIONS: Record<Room | Corridor, { x: number; y: number }> = {
+export const LOCATION_POSITIONS: Record<Location, { x: number; y: number }> = {
   "Library": { x: 221.5, y: 542.0 },
   "Study": { x: 226.0, y: 180.5 },
   "Hall": { x: 954.0, y: 163.0 },
@@ -180,7 +185,15 @@ export const LOCATION_POSITIONS: Record<Room | Corridor, { x: number; y: number 
   "Hall-Billiard Room": { x: 968.5, y: 352.5 },
   "Billiard Room-Ballroom": { x: 968.0, y: 736.5 },
   "Lounge-Dining Room": { x: 1702.0, y: 352.5 },
+  // Secret passages (fallback if server ever uses these as locations)
+  [SecretPassages.StudyKitchen]: { x: 420, y: 220 },
+  [SecretPassages.KitchenStudy]: { x: 1520, y: 880 },
+  [SecretPassages.LoungeConservatory]: { x: 1520, y: 220 },
+  [SecretPassages.ConservatoryLounge]: { x: 280, y: 880 },
 };
+
+/** Match add/removeEventListener so listeners are actually stripped. */
+const BOARD_MAP_CLICK_OPTIONS: AddEventListenerOptions = { capture: true };
 
 export class View {
   displayTxt: HTMLElement;
@@ -189,6 +202,11 @@ export class View {
   playerElements: Map<string, HTMLParagraphElement>;
   popupTimeout: number | null = null;
   characterLocations: Record<string, string> = {};
+  /** Preserves fan-out when window resizes repositions pieces. */
+  private pieceStackByCharacter = new Map<
+    string,
+    { stackIndex: number; stackCount: number }
+  >();
   windowWidth: number = 1920;
   windowHeight: number = 1080;
 
@@ -208,8 +226,9 @@ export class View {
     }
   }
   gameBoardClickHandler = (event: MouseEvent) => {
-    // Prevent the default "href" behavior (reloading the page)
+    // Cancel any navigable-area default before it can reload the SPA / drop WS
     event.preventDefault();
+    event.stopPropagation?.();
 
     // The 'target' is the specific <area> that was clicked
     const clickedArea = event.target as HTMLAreaElement;
@@ -221,7 +240,11 @@ export class View {
       console.log(`clicked: ${locationId}`);
       const location = ID_TO_LOCATION[locationId];
       if (location && boardClickCallback) {
-        boardClickCallback(location);
+        try {
+          boardClickCallback(location);
+        } catch (e) {
+          console.error("boardClickCallback error", e);
+        }
       }
     }
   }
@@ -443,35 +466,63 @@ export class View {
   }
 
   public ShowLandingScreen(): void {
+    this.EnableActions(false);
     this.ShowScreen("landing-screen");
   }
   public ShowLobbyScreen(showStartButton: boolean): void {
+    this.EnableActions(false);
     this.ShowScreen("lobby-screen");
     this.SetStartButtonVisibility(showStartButton);
   }
 
   private updateAllPiecePositions() {
     Object.entries(this.characterLocations).forEach(([character, location]) => {
-      this.SetCharacterLocation(character as Character, location as Location);
+      this.SetCharacterLocation(character, location as Location);
     });
   }
 
-  public SetCharacterLocation(character: Character, location: Location) {
+  /**
+   * Places a suspect token. `stack` fans out pieces that share the same room
+   * so one portrait does not fully cover another (DOM paint order).
+   */
+  public SetCharacterLocation(
+    character: string,
+    location: Location,
+    stack?: { stackIndex: number; stackCount: number },
+  ) {
     const board = document.getElementById("board-image") as HTMLImageElement;
-    const piece = document.getElementById(
-      CHARACTER_TO_PORTRAIT[character]
-    ) as HTMLImageElement;
+    const portraitId = portraitIdForServerCharacter(character);
+    const piece = portraitId
+      ? (document.getElementById(portraitId) as HTMLImageElement)
+      : null;
 
     if (!board || !piece) return;
 
+    if (stack) {
+      this.pieceStackByCharacter.set(character, stack);
+    }
+    const meta =
+      stack ?? this.pieceStackByCharacter.get(character) ?? {
+        stackIndex: 0,
+        stackCount: 1,
+      };
+
     piece.classList.remove("hidden");
 
-    const pos = LOCATION_POSITIONS[location as Room | Corridor];
+    const pos = LOCATION_POSITIONS[location];
+    if (!pos) {
+      console.warn("Unknown location for piece:", location, character);
+      return;
+    }
 
-    const x = board.clientWidth * pos.x / this.windowWidth;
-    const y = board.clientHeight * pos.y / this.windowHeight;
+    const x = (board.clientWidth * pos.x) / this.windowWidth;
+    const y = (board.clientHeight * pos.y) / this.windowHeight;
+    const spreadPx =
+      meta.stackCount > 1
+        ? (meta.stackIndex - (meta.stackCount - 1) / 2) * 24
+        : 0;
 
-    piece.style.left = `${x}px`;
+    piece.style.left = `${x + spreadPx}px`;
     piece.style.top = `${y}px`;
 
     this.characterLocations[character] = location;
@@ -491,7 +542,11 @@ export class View {
       'map[name="image-map"]',
     ) as HTMLMapElement;
     if (gameMap) {
-      gameMap.removeEventListener("click", this.gameBoardClickHandler);
+      gameMap.removeEventListener(
+        "click",
+        this.gameBoardClickHandler,
+        BOARD_MAP_CLICK_OPTIONS,
+      );
     }
 
     const moveButton = document.getElementById("move") as HTMLButtonElement;
@@ -514,11 +569,18 @@ export class View {
   }
 
   private doEnableActions() {
+    // Strip first so repeated EnableActions(true) never stacks duplicate listeners
+    this.doDisableActions();
+
     const gameMap = document.querySelector(
       'map[name="image-map"]',
     ) as HTMLMapElement;
     if (gameMap) {
-      gameMap.addEventListener("click", this.gameBoardClickHandler);
+      gameMap.addEventListener(
+        "click",
+        this.gameBoardClickHandler,
+        BOARD_MAP_CLICK_OPTIONS,
+      );
     }
 
     const moveButton = document.getElementById("move") as HTMLButtonElement;
