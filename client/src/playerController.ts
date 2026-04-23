@@ -152,13 +152,13 @@ export class PlayerController {
     });
 
     onBoardClick((location: Location) => {
+      console.log("Hello");
       if (this.playerPhase !== PLAYER_STATES.Selecting) return;
       if (this.selectionContext !== "move") return;
 
       const activeId =
         this.gameState?.turn_order[this.gameState.current_turn_index] ?? "";
       if (activeId !== this.playerId) return;
-
       this.client.sendMessage({
         type: "move",
         payload: { destination: location },
@@ -200,7 +200,6 @@ export class PlayerController {
         
         this.hand = event.payload.cards;
         this.view.SetPlayerHand(this.hand);
-
         this.view.SetPlayerProfile(this.playerId, this.playerState!.character);
         this.setPhase(PLAYER_STATES.Idle);
         break;

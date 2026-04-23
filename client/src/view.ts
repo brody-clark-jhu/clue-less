@@ -460,6 +460,15 @@ export class View {
   public SetPlayerProfile(playerId: string, character: Character) {
     const playerIdElement = document.getElementById("player-id")!;
     const playerName = document.getElementById("player-name")!;
+    const playerProfile = document.getElementById("player-profile");
+   const playerPortrait = document.getElementById(
+      CHARACTER_TO_PORTRAIT[character]
+    ) as HTMLImageElement;    
+    const profileImg = playerPortrait.cloneNode(false) as HTMLElement;
+    playerProfile?.appendChild(profileImg);
+    profileImg.style.borderRadius = '50%';
+    profileImg.style.width = '100%';
+    profileImg.classList.remove("game-piece", "hidden");
 
     playerIdElement.innerText = `Player ${playerId}`
     playerName.innerText = character;
