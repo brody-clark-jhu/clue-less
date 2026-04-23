@@ -58,8 +58,19 @@ async def setup_connection(socket: WebSocket):
             msg = await socket.receive_json()
             logger.info(f'Message received from {player_id}: {msg}')
 
-            #delegate to game manager
-            responses = game_manager.handle_command(player_id, msg)
+            try:
+                responses = game_manager.handle_command(player_id, msg)
+            except Exception as e:
+                logger.exception("GameManager error for %s: %s", player_id, e)
+                await send_to(
+                    player_id,
+                    {
+                        "type": "error",
+                        "payload": {"message": "server error processing command"},
+                    },
+                )
+                continue
+
             for tgt, resp in responses:
                 await send_to(tgt, resp)
 

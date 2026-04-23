@@ -200,6 +200,56 @@ describe("PlayerController - initialization", () => {
     expect(view.DisableCardSelection).toHaveBeenCalled();
   });
 
+  it("game_update does not exit Disprove while suggestion is pending", async () => {
+    const client = mockClient();
+    const view = mockView();
+    const controller = new PlayerController(client as any, view as any);
+
+    (controller as any).playerId = "p2";
+    (controller as any).playerState = {
+      playerId: "p2",
+      character: "Miss Scarlet",
+      location: "Kitchen",
+      must_suggest: false,
+      eliminated: false,
+    };
+    (controller as any).hand = ["Knife"];
+
+    await (controller as any).handleDisproveRequest({
+      suspect: "Miss Scarlet",
+      weapon: "Knife",
+      room: "Kitchen",
+    });
+
+    expect((controller as any).playerPhase).toBe(PLAYER_STATES.Disprove);
+    vi.mocked(view.DisableCardSelection).mockClear();
+
+    controller.onServerEvent({
+      type: "game_update",
+      payload: {
+        phase: "active",
+        current_turn_index: 0,
+        turn_order: ["p1", "p2"],
+        suggestion_pending: true,
+        playerStates: [
+          {
+            playerId: "p1",
+            character: "Mr. Green",
+            location: "Kitchen",
+            must_suggest: false,
+            eliminated: false,
+          },
+          (controller as any).playerState,
+        ],
+      },
+    } as any);
+
+    await Promise.resolve();
+
+    expect((controller as any).playerPhase).toBe(PLAYER_STATES.Disprove);
+    expect(view.DisableCardSelection).not.toHaveBeenCalled();
+  });
+
 
 
 });
