@@ -461,7 +461,9 @@ export class View {
     const playerIdElement = document.getElementById("player-id")!;
     const playerName = document.getElementById("player-name")!;
     const playerProfile = document.getElementById("player-profile");
-   const playerPortrait = document.getElementById(
+
+    // Quick and easy, just copy the game piece and add it to the profile container
+    const playerPortrait = document.getElementById(
       CHARACTER_TO_PORTRAIT[character]
     ) as HTMLImageElement;    
     const profileImg = playerPortrait.cloneNode(false) as HTMLElement;
