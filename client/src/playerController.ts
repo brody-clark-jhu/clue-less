@@ -61,9 +61,12 @@ export class PlayerController {
 
   private notebookItems: NotebookItem[] = [];
   private hand: Card[] = [];
+  /** Cards in hand that match the current disprove request (server suggestion strings). */
+  private disproofEligibleCards: Card[] = [];
 
   // Selection context
-  private selectionContext: "suggestion" | "accusation" | "disprove" | null = null;
+  private selectionContext: "move" | "suggestion" | "accusation" | "disprove" | null =
+    null;
   private selectionStep: "suspect" | "weapon" | "room" | null = null;
 
   private suggestion = { suspect: undefined as Character | undefined, weapon: undefined as Weapon | undefined };
@@ -134,8 +137,8 @@ export class PlayerController {
     onMoveButtonClick(() => {
       if (this.playerPhase !== PLAYER_STATES.Active) return;
       this.view.SetPopupEventMessage("Select a location to move to", 2);
+      this.selectionContext = "move";
       this.setPhase(PLAYER_STATES.Selecting);
-      this.selectionContext = "suggestion";
     });
 
     onSuggestionButtonClick(() => {
@@ -150,6 +153,11 @@ export class PlayerController {
 
     onBoardClick((location: Location) => {
       if (this.playerPhase !== PLAYER_STATES.Selecting) return;
+      if (this.selectionContext !== "move") return;
+
+      const activeId =
+        this.gameState?.turn_order[this.gameState.current_turn_index] ?? "";
+      if (activeId !== this.playerId) return;
 
       this.client.sendMessage({
         type: "move",
@@ -170,13 +178,14 @@ export class PlayerController {
   private async processQueue() {
     if (this.isProcessing) return;
     this.isProcessing = true;
-
-    while (this.eventQueue.length > 0) {
-      const event = this.eventQueue.shift();
-      if (event) await this.handleServerEvent(event);
+    try {
+      while (this.eventQueue.length > 0) {
+        const event = this.eventQueue.shift();
+        if (event) await this.handleServerEvent(event);
+      }
+    } finally {
+      this.isProcessing = false;
     }
-
-    this.isProcessing = false;
   }
 
   private async handleServerEvent(event: ServerEvent) {
@@ -203,18 +212,20 @@ export class PlayerController {
         break;
 
       case "disprove_request":
-        this.handleDisproveRequest(event.payload);
+        await this.handleDisproveRequest(event.payload);
         break;
 
-      case "suggestion_made":
-        const player = this.gameState!.playerStates.find(
+      case "suggestion_made": {
+        if (!this.gameState) break;
+        const player = this.gameState.playerStates.find(
           (p) => p.playerId === event.payload.playerId
         );
-        const location = player?.location
+        const location = player?.location;
         await this.view.SetPopupEventMessage(
           `Player ${event.payload.playerId} suggested ${event.payload.suspect} with ${event.payload.weapon} in ${location}.`
         );
         break;
+      }
 
       case "suggestion_unchallenged": {
         const suggestionPlayer = event.payload.playerId;
@@ -254,9 +265,26 @@ export class PlayerController {
         );
         break;
       }
-      case "error":
-        await this.view.SetPopupEventMessage(event.payload.message, 3);
+      case "error": {
+        const msg = event.payload.message;
+        await this.view.SetPopupEventMessage(msg, 3);
+        if (
+          this.playerPhase === PLAYER_STATES.Disprove &&
+          msg.toLowerCase().includes("invalid") &&
+          (msg.toLowerCase().includes("disproof") ||
+            msg.toLowerCase().includes("disprove"))
+        ) {
+          const cards =
+            this.disproofEligibleCards.length > 0
+              ? this.disproofEligibleCards
+              : this.hand;
+          this.view.EnableCardSelection(
+            cards,
+            "Select a valid card from the suggestion to disprove"
+          );
+        }
         break;
+      }
 
       case "lobby_update": {
         this.view.UpdateLobbyPlayers(event.payload.players, this.playerId);
@@ -290,9 +318,26 @@ export class PlayerController {
         this.setPhase(PLAYER_STATES.Lobby);
     }
     else if (this.gameState.phase == "active") {
-      // update board
-      this.gameState.playerStates.forEach((p) => {
-        this.view.SetCharacterLocation(p.character, p.location);
+      // update board (fan-out shared rooms so tokens are not stacked invisibly)
+      const sorted = [...this.gameState.playerStates].sort((a, b) =>
+        a.character.localeCompare(b.character),
+      );
+      const perLocationCount = new Map<string, number>();
+      for (const p of sorted) {
+        perLocationCount.set(
+          p.location,
+          (perLocationCount.get(p.location) ?? 0) + 1,
+        );
+      }
+      const perLocationIndex = new Map<string, number>();
+      sorted.forEach((p) => {
+        const stackCount = perLocationCount.get(p.location) ?? 1;
+        const stackIndex = perLocationIndex.get(p.location) ?? 0;
+        perLocationIndex.set(p.location, stackIndex + 1);
+        this.view.SetCharacterLocation(p.character, p.location, {
+          stackIndex,
+          stackCount,
+        });
       });
       if (activeId === this.playerId) {
         this.view.SetPlayerTurn("Your Turn");
@@ -307,7 +352,16 @@ export class PlayerController {
       } else {
         console.log(`Player ${activeId}'s Turn`);
         this.view.SetPlayerTurn(`Player ${activeId}'s Turn`);
-        this.setPhase(PLAYER_STATES.Idle);
+        // While we're disproving, turn still belongs to the suggester; don't
+        // force Idle here or exitState(Disprove) clears cards before we can act.
+        if (
+          this.playerPhase === PLAYER_STATES.Disprove &&
+          this.gameState.suggestion_pending
+        ) {
+          /* keep Disprove phase and card UI */
+        } else {
+          this.setPhase(PLAYER_STATES.Idle);
+        }
       }
       
     }
@@ -354,7 +408,17 @@ export class PlayerController {
       case PLAYER_STATES.Disprove:
         console.log("Disprove state");
         this.selectionContext = "disprove";
-        this.view.EnableCardSelection(this.hand, "Select a card to disprove");
+        {
+          const cards =
+            this.disproofEligibleCards.length > 0
+              ? this.disproofEligibleCards
+              : this.hand;
+          this.view.EnableCardSelection(cards, "Select a card to disprove");
+        }
+        break;
+
+      case PLAYER_STATES.Eliminated:
+        this.view.EnableActions(false);
         break;
     }
   }
@@ -362,6 +426,14 @@ export class PlayerController {
   private exitState(state: PlayerPhase) {
     if (state === PLAYER_STATES.Disprove || state === PLAYER_STATES.Selecting) {
       this.view.DisableCardSelection();
+    }
+    if (state === PLAYER_STATES.Disprove) {
+      this.disproofEligibleCards = [];
+      this.selectionContext = null;
+    }
+    if (state === PLAYER_STATES.Selecting) {
+      this.selectionContext = null;
+      this.selectionStep = null;
     }
   }
 
@@ -385,6 +457,7 @@ export class PlayerController {
 
   private handleCardSelection(card: Card) {
     if (!this.selectionContext) return;
+    if (this.selectionContext === "move") return;
 
     if (this.selectionContext === "suggestion") {
       this.handleSuggestionSelection(card);
@@ -405,7 +478,6 @@ export class PlayerController {
         payload: payload,
       };
       this.client.sendMessage(command);
-      this.setPhase(PLAYER_STATES.Idle);
   }
 
   private handleSuggestionSelection(card: Card) {
@@ -476,11 +548,13 @@ export class PlayerController {
     ]);
 
     const valid = this.hand.filter((c) => suggestion.has(c));
+    this.disproofEligibleCards = valid;
 
     if (valid.length > 0) {
       await this.view.SetPopupEventMessage("Select a card to disprove with", 3);
       this.setPhase(PLAYER_STATES.Disprove);
     } else {
+      this.disproofEligibleCards = [];
       console.log("Cannot disprove");
       this.client.sendMessage({ type: "cannot_disprove", payload: {} });
     }
