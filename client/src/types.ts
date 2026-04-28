@@ -73,6 +73,7 @@ export type PlayerState = {
   moved_this_turn: boolean;
   must_suggest: boolean;
   dragged_to_room: boolean;
+   player_number: number;
 };
 
 export interface GameState {

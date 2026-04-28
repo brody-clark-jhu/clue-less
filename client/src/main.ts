@@ -2,6 +2,7 @@ import "./styles/board.css";
 import "./styles/style.css";
 import "./styles/shared.css";
 import "./styles/lobby.css";
+import "./styles/winner.css";
 import { Client } from "./client";
 import { PlayerController } from "./playerController";
 import { View } from "./view";

@@ -97,6 +97,15 @@ const CHARACTER_TO_PORTRAIT: Record<Character, string> = {
   "Professor Plum": "portrait-prof-plum",
 };
 
+const CHARACTER_TO_IMAGE: Record<Character, string> = {
+  "Colonel Mustard": "./public/images/character_mustard.png",
+  "Miss Scarlet":    "./public/images/character_scarlet.png",
+  "Mr. Green":       "./public/images/character_green.png",
+  "Mrs. Peacock":    "./public/images/character_peacock.png",
+  "Mrs. White":      "./public/images/character_white.png",
+  "Professor Plum":  "./public/images/character_plum.png",
+};
+
 /** Server / older clients may still send display abbreviations. */
 function portraitIdForServerCharacter(character: string): string | undefined {
   if (character === "Col. Mustard") {
@@ -710,5 +719,14 @@ export class View {
       const isHost = myPlayer?.isHost ?? false;
       startBtn.style.display = isHost ? "block" : "none";
     }
+  }
+
+  //shows the winner screen with the winning player's character image and name
+  public ShowWinnerScreen(playerNumber: number, character: Character): void {
+    const img = document.getElementById("winner-character-image") as HTMLImageElement | null;
+    const text = document.getElementById("winner-text") as HTMLElement | null;
+    if (img) img.src = CHARACTER_TO_IMAGE[character] ?? "";
+    if (text) text.textContent = `Player ${playerNumber} won as ${character}`;
+    this.ShowScreen("winner-screen");
   }
 }

@@ -1,11 +1,19 @@
 /* Basic resets and layout */
 html,
-body,
+body {
+    height: 100%;
+    margin: 0;
+    box-sizing: border-box;
+}
+
 #game-board-screen {
     height: 100%;
     margin: 0;
     box-sizing: border-box;
     background-image: url(../images/background_board.png);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 /* Header */
@@ -18,12 +26,14 @@ body,
     max-height: 2em;
     margin-left: 2em;
     width: 80%;
+    color: white;
 }
 
 #title {
     font-size: 3rem;
     width: 20rem;
     padding-left: 2em;
+    color : white;
 }
 
 #hand-display {

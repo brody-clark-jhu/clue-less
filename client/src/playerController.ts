@@ -46,6 +46,7 @@ export const PLAYER_STATES = {
   Selecting: 4,
   Disprove: 5,
   Eliminated: 6,
+  Winner: 7,
 } as const;
 
 type PlayerPhase = (typeof PLAYER_STATES)[keyof typeof PLAYER_STATES];
@@ -250,10 +251,12 @@ export class PlayerController {
         break;
       }
       case "game_over": {
-        await this.view.SetPopupEventMessage(
-          `Player ${event.payload.winner} has won. The solution was ${JSON.stringify(event.payload.solution)} Game over.`,
-          5,
-        );
+        const winnerState = this.gameState?.playerStates.find((p) => p.playerId === event.payload.winner);
+        if (winnerState) {
+          // set Winner phase first so any following game_update cannot override the screen
+          this.setPhase(PLAYER_STATES.Winner);
+          this.view.ShowWinnerScreen(winnerState.player_number, winnerState.character as Character);
+        }
         break;
       }
       case "disprove_card": {
@@ -307,6 +310,8 @@ export class PlayerController {
 
   private async handleGameStateChange() {
     if (!this.gameState || !this.playerState) return;
+   
+    if (this.playerPhase === PLAYER_STATES.Winner) return;
 
     console.log(`Game State: ${JSON.stringify(this.gameState)}`);
 
@@ -419,6 +424,9 @@ export class PlayerController {
 
       case PLAYER_STATES.Eliminated:
         this.view.EnableActions(false);
+        break;
+
+      case PLAYER_STATES.Winner:
         break;
     }
   }
