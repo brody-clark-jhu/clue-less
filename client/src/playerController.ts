@@ -46,6 +46,7 @@ export const PLAYER_STATES = {
   Selecting: 4,
   Disprove: 5,
   Eliminated: 6,
+  Winner: 7,
 } as const;
 
 type PlayerPhase = (typeof PLAYER_STATES)[keyof typeof PLAYER_STATES];
@@ -201,7 +202,8 @@ export class PlayerController {
         this.hand = event.payload.cards;
         this.view.SetPlayerHand(this.hand);
 
-        this.view.SetPlayerProfile(this.playerId, this.playerState!.character);
+        // show player number instead of UID in the player profile
+        this.view.SetPlayerProfile(`Player ${this.playerState!.player_number}`, this.playerState!.character);
         this.setPhase(PLAYER_STATES.Idle);
         break;
 
@@ -250,10 +252,12 @@ export class PlayerController {
         break;
       }
       case "game_over": {
-        await this.view.SetPopupEventMessage(
-          `Player ${event.payload.winner} has won. The solution was ${JSON.stringify(event.payload.solution)} Game over.`,
-          5,
-        );
+        const winnerState = this.gameState?.playerStates.find((p) => p.playerId === event.payload.winner);
+        if (winnerState) {
+          // set Winner phase first so any following game_update cannot override the screen
+          this.setPhase(PLAYER_STATES.Winner);
+          this.view.ShowWinnerScreen(winnerState.player_number, winnerState.character as Character);
+        }
         break;
       }
       case "disprove_card": {
@@ -308,6 +312,8 @@ export class PlayerController {
   private async handleGameStateChange() {
     if (!this.gameState || !this.playerState) return;
 
+    if (this.playerPhase === PLAYER_STATES.Winner) return;
+    
     console.log(`Game State: ${JSON.stringify(this.gameState)}`);
 
     const activeId =
@@ -350,8 +356,11 @@ export class PlayerController {
         this.setPhase(PLAYER_STATES.Active);
         }
       } else {
-        console.log(`Player ${activeId}'s Turn`);
-        this.view.SetPlayerTurn(`Player ${activeId}'s Turn`);
+        // look up player number to display instead of UID
+        const activePlayer = this.gameState.playerStates.find((p) => p.playerId === activeId);
+        const activePlayerNum = activePlayer?.player_number ?? activeId;
+        console.log(`Player ${activePlayerNum}'s Turn`);
+        this.view.SetPlayerTurn(`Player ${activePlayerNum}'s Turn`);
         // While we're disproving, turn still belongs to the suggester; don't
         // force Idle here or exitState(Disprove) clears cards before we can act.
         if (
@@ -419,6 +428,9 @@ export class PlayerController {
 
       case PLAYER_STATES.Eliminated:
         this.view.EnableActions(false);
+        break;
+
+      case PLAYER_STATES.Winner:
         break;
     }
   }

@@ -163,6 +163,15 @@ const LOCATION_TO_ID: Record<Location, string> = {
   [SecretPassages.ConservatoryLounge]: "Conservatory-Lounge",
 };
 
+const CHARACTER_TO_IMAGE: Record<Character, string> = {
+  "Colonel Mustard": "./public/images/character_mustard.png",
+  "Miss Scarlet":    "./public/images/character_scarlet.png",
+  "Mr. Green":       "./public/images/character_green.png",
+  "Mrs. Peacock":    "./public/images/character_peacock.png",
+  "Mrs. White":      "./public/images/character_white.png",
+  "Professor Plum":  "./public/images/character_plum.png",
+};
+
 export const LOCATION_POSITIONS: Record<Location, { x: number; y: number }> = {
   "Library": { x: 221.5, y: 542.0 },
   "Study": { x: 226.0, y: 180.5 },
@@ -721,5 +730,14 @@ export class View {
       const isHost = myPlayer?.isHost ?? false;
       startBtn.style.display = isHost ? "block" : "none";
     }
+  }
+  
+  //shows the winner screen with the winning player's character image and name
+  public ShowWinnerScreen(playerNumber: number, character: Character): void {
+    const img = document.getElementById("winner-character-image") as HTMLImageElement | null;
+    const text = document.getElementById("winner-text") as HTMLElement | null;
+    if (img) img.src = CHARACTER_TO_IMAGE[character] ?? "";
+    if (text) text.textContent = `Player ${playerNumber} won as ${character}`;
+    this.ShowScreen("winner-screen");
   }
 }
